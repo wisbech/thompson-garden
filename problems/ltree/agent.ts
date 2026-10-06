@@ -2,12 +2,13 @@
 // Self-contained: type imports only.
 import type { LTreeAgent } from "../../judge/ltree/world";
 
-// Baseline: Prusinkiewicz and Lindenmayer's "fractal plant" (The Algorithmic Beauty of Plants, figure 1.24f),
-// set upright on the root.
+// A bifurcating tree with a short trunk, a central continuation and almost no shrinking: few thick
+// branches fan the leaves out across the whole frame, so each sun finds many tips for modest wood.
 export const grammar: LTreeAgent["grammar"] = () => ({
-  axiom: "X",
-  rules: { X: "F+[[X]-X]-F[-FX]+X", F: "FF" },
+  axiom: "FX",
+  rules: { X: "!F[+X][-X]F[X]" },
   iterations: 5,
-  angle: 25,
-  step: 4.5,
+  angle: 40.15,
+  step: 54.4,
+  shrink: 0.99,
 });
