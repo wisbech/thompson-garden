@@ -56,7 +56,7 @@ export const grow: CanopyAgent["grow"] = (world) => {
     if (v >= next && v > 0) {
       gain(cx[t], cy[t], true);
       nodes.push({ x: cx[t], y: cy[t], parent: 0 });
-      v === v && (val[t] = -1);
+      val[t] = -1;
     } else val[t] = v;
     if (val[t] <= 0) heap[0] = heap[heap.length - 1], heap.pop();
     down(0);
