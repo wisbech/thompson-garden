@@ -1,32 +1,44 @@
-// The Flock agent: the heading each agent wants. The only file a Flock card changes.
+// Flock agent. Edit this file only.
 // Self-contained: type imports only.
 import type { FlockAgent } from "../../judge/flock/world";
 
-// Look-ahead steering: try headings fanned around "straight right", fly the one whose path stays
-// clearest of the obstacles in sight, prefer small turns and the current heading, and keep off neighbours.
-const ANGLES = 25, FAN = 1.5, LOOK = 54, STEP = 6, MARGIN = 5;
-const SEP_AT = 4, SEP = 10, SEP_W = 20;
+// Rollout steering: for each candidate target heading fanned around "straight right", simulate the
+// judge's own turn-limited flight a few dozen steps ahead, charge for obstacles and neighbours met on
+// the way, add a small pull toward the goal heading and toward the current choice, fly the cheapest.
+const N = 17, FAN = 1.6, STEPS = 22, SPEED = 4, TURN = 0.3;
+const TN = 4;
+const MARGIN = 3, NEAR = 6, W_OBS = 100, W_NB = 500, W_GOAL = 2, W_KEEP = 1;
 
 export const steer: FlockAgent["steer"] = (me, neighbours, obstacles, world) => {
+  if (obstacles.length === 0 && neighbours.length === 0) return 0;
   let best = 0, bestCost = Infinity;
-  for (let i = 0; i < ANGLES; i++) {
-    const a = -FAN + (2 * FAN * i) / (ANGLES - 1);
-    const c = Math.cos(a), s = Math.sin(a);
-    let cost = Math.abs(a) * 1.5 + Math.abs(a - me.heading) * 0.8;
-    for (let d = STEP; d <= LOOK; d += STEP) {
-      const px = c * d, py = s * d;
+  for (let k = 0; k < N; k++) {
+    // centre outward, so the cheap straight options set the bound early
+    const i = (N >> 1) + (k & 1 ? (k + 1) >> 1 : -(k >> 1));
+    const target = -FAN + (2 * FAN * i) / (N - 1);
+    let h = me.heading, x = 0, y = 0;
+    let cost = W_GOAL * Math.abs(target) + W_KEEP * Math.abs(target - me.heading);
+    for (let t = 1; t <= STEPS && cost < bestCost; t++) {
+      let d = target - h;
+      d = Math.atan2(Math.sin(d), Math.cos(d));
+      h += Math.max(-TURN, Math.min(TURN, d));
+      x += SPEED * Math.cos(h);
+      y += SPEED * Math.sin(h);
+      const w = 1 - t / (STEPS + 8);
       for (const o of obstacles) {
-        const gap = Math.hypot(o.dx - px, o.dy - py) - o.r - MARGIN;
-        if (gap < 0) cost += (1 - gap / MARGIN) * 40 * (1 - d / (LOOK + STEP));
+        const gap = Math.hypot(o.dx - x, o.dy - y) - o.r - MARGIN;
+        if (gap < 0) cost += W_OBS * w * (1 - gap / MARGIN);
       }
-      const y = me.y + py;
-      if (y < 8 || y > world.height - 8) cost += 6;
+      const py = me.y + y;
+      if (py < 6 || py > world.height - 6) cost += 3;
+      if (t <= TN) for (const n of neighbours) {
+        const dist = Math.hypot(n.dx + SPEED * t * Math.cos(n.heading) - x, n.dy + SPEED * t * Math.sin(n.heading) - y);
+        if (dist < NEAR) cost += W_NB * (NEAR - dist) / NEAR * w;
+      }
     }
-    for (const n of neighbours) {
-      const dist = Math.hypot(n.dx - c * SEP_AT, n.dy - s * SEP_AT);
-      if (dist < SEP) cost += (SEP - dist) * SEP_W;
-    }
-    if (cost < bestCost) { bestCost = cost; best = a; }
+    // progress: how far right the rollout ends
+    cost -= 0.05 * x;
+    if (cost < bestCost) { bestCost = cost; best = target; }
   }
   return best;
 };
