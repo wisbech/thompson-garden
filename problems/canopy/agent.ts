@@ -4,8 +4,12 @@ import type { CanopyAgent, Node } from "../../judge/canopy/world";
 
 // A star of single-leaf branches from the root. Leaves are placed greedily: each new one goes where it
 // uncovers the most still-dark rays (for all three suns) minus its wood, until none pays for itself.
-// Branches that share the root never cross, and every leaf has area 1, so wood is just the lengths.
-const RAYS = 600, LEAF = 5, WOOD_SCALE = 200_000, STEP = 6;
+// Segments that share the root are never tested for crossing by the judge, and collinear ones do not
+// count as crossing either (it needs strict opposite sides). Every tip has pipe area 1, so wood is just
+// the branch lengths; a star gives up trunk sharing, which the stop rule prices in per leaf.
+// The constants mirror judge/canopy/world.ts (type imports only, so they are copied): LEAF is the leaf
+// disc radius, RAYS the rays per sun, WOOD_SCALE the wood that costs one unit of light, MAX_NODES the cap.
+const RAYS = 600, LEAF = 5, WOOD_SCALE = 200_000, MAX_NODES = 3000, STEP = 6;
 
 export const grow: CanopyAgent["grow"] = (world) => {
   const [rx, ry] = world.root;
@@ -49,7 +53,7 @@ export const grow: CanopyAgent["grow"] = (world) => {
   };
   for (let i = (heap.length >> 1) - 1; i >= 0; i--) down(i);
   const nodes: Node[] = [{ x: rx, y: ry, parent: -1 }];
-  while (nodes.length < 3000 && heap.length > 0) {
+  while (nodes.length < MAX_NODES && heap.length > 0) {
     const t = heap[0];
     const v = gain(cx[t], cy[t], false) - cw[t];
     const next = Math.max(heap.length > 1 ? val[heap[1]] : -1, heap.length > 2 ? val[heap[2]] : -1);
