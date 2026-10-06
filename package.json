@@ -5,7 +5,7 @@
   "scripts": {
     "test": "bun test",
     "typecheck": "tsc --noEmit",
-    "score": "bun judge/flow/check.ts --score"
+    "score": "bun judge/check.ts all --score"
   },
   "devDependencies": {
     "bun-types": "^1.4.2",

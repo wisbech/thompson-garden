@@ -1,6 +1,6 @@
 {
   "setup": [["bun", "install", "--frozen-lockfile"]],
-  "gates": [["bun", "test", "--timeout", "60000"], ["bunx", "tsc", "--noEmit"]],
+  "gates": [["bun", "test", "--timeout", "120000"], ["bunx", "tsc", "--noEmit"]],
   "protected": ["judge/", "site/", "docs/", "package.json", "bun.lock", "tsconfig.json", "README.md"],
-  "score": ["bun", "judge/flow/check.ts", "--score"]
+  "score": ["bun", "judge/check.ts", "all", "--score"]
 }

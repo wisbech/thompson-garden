@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { makeField, minSeparation, run, SPACING, coverage, type FlowAgent } from "./world";
 import { seedsFor } from "../seed";
-import { scoreAgent } from "./check";
+import { problems, scoreModule } from "../problems";
 
 const randomStarts: FlowAgent = {
   nextSeed: (w) => (w.missesInARow >= 400 ? null : [w.random() * w.width, w.random() * w.height]),
@@ -45,7 +45,7 @@ test("the budget cuts an agent that never stops", () => {
 });
 
 test("the baseline scores between 0 and 1", () => {
-  const s = scoreAgent(randomStarts, [1]).mean;
+  const s = scoreModule(problems.flow, randomStarts, [1]).mean;
   expect(s).toBeGreaterThan(0.3);
   expect(s).toBeLessThan(1);
 });

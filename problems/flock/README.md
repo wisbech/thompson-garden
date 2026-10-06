@@ -1,13 +1,17 @@
 # Flock
 
-Proposed, not built. No judge yet; it is written by hand, by a person, when this problem is picked.
+Two hundred agents cross a field of fourteen obstacles, placed from the commit, from the left edge to the right.
 
-Two hundred agents cross an obstacle field placed from the commit (Reynolds' boids, M_1_5's agents).
+**The world (judge/flock/world.ts, protected).** A 1000 × 600 field; 1,500 steps. Every agent flies at 2 px
+per step and turns at most 0.15 rad per step toward the heading it asks for. It sees other agents within 30 px
+and obstacles within 60 px of their edge. Touching an obstacle ends that agent; crossing x = 980 counts it as
+arrived.
 
-**The agent (yours).** A steering function that sees neighbours and obstacles within a radius. The judge owns speed, turning and collisions.
+**The agent (agent.ts, yours).** `steer(me, neighbours, obstacles, world)` returns the heading this agent wants.
+Neighbours and obstacles come as offsets from the agent.
 
-**The check.** The run finishes inside the budget.
+**The score.** The share of agents that arrive, minus 0.002 for every pair of agents that ever touched
+(closer than 4 px).
 
-**The score.** Share of agents arriving within T steps, minus a penalty per collision.
-
-Full proposal: the project's `visual-problems/visual-problems.md`.
+**Baseline.** P_2_2_1's "stupid agent" given a goal, heading straight right: **0.0183**. Most fly into the
+first obstacle in their row.

@@ -15,11 +15,11 @@ the distance to the nearest trail, a seeded `random()` (use it instead of `Math.
 the number of calls, and the number of starts refused since the last accepted trail. Keep the file
 self-contained: type imports only, because the check also loads the base's copy on its own.
 
-**The check.** `bun judge/flow/check.ts --base <sha>` runs the base's agent and this commit's agent on
+**The check.** `bun judge/check.ts flow --base <sha>` runs the base's agent and this commit's agent on
 three fields seeded from this commit, 10 seconds and 200,000 calls each, and passes when this commit's
 mean coverage is higher. Coverage is the share of the page within half a spacing of a trail.
 
-**The score.** `bun judge/flow/check.ts --score`: mean coverage on three fixed fields. Baseline, random
+**The score.** `bun judge/check.ts flow --score`: mean coverage on three fixed fields. Baseline, random
 starts: **0.8282** (taken by hand on the first commit).
 
-**Draw it.** `bun judge/flow/check.ts --svg out.svg`.
+**Draw it.** `bun judge/check.ts flow --picture out` (writes out.svg).

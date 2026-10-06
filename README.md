@@ -15,16 +15,24 @@ Thompson is pointed at this repository as a target; nothing here is part of Thom
 
 The judge owns the world (the field, the physics, the food, the graph); the worker writes only the agent.
 Judged runs use seeds derived from the commit under judgement, and every run has a fixed time budget.
+Agents run inside the judge's process, so `judge/check.ts` refuses an agent that imports anything but types,
+touches `process`, `globalThis` or `eval`, or reassigns built-ins or prototypes.
 
 ## Problems
 
-| Problem | Status |
-| --- | --- |
-| [Flow](problems/flow/) | judge built; baseline 0.8282 |
-| [Slime](problems/slime/), [Web](problems/web/), [Flock](problems/flock/), [Canopy](problems/canopy/) | proposed |
-| [Pack](problems/pack/), [Coral](problems/coral/), [Methuselah](problems/methuselah/) | proposed (kept from the 01_P draft) |
+| Problem | Agent | Baseline (fixed seeds 1, 2, 3) |
+| --- | --- | --- |
+| [Flow](problems/flow/) | where each trail starts | 0.8282 coverage |
+| [Slime](problems/slime/) | how each Physarum agent senses, turns, deposits | 0.0222 |
+| [Web](problems/web/) | the forces on each node | 0.1368 |
+| [Flock](problems/flock/) | the heading each agent wants | 0.0183 |
+| [Canopy](problems/canopy/) | the program that grows the tree | 0.2247 |
+| [Pack](problems/pack/), [Coral](problems/coral/), [Methuselah](problems/methuselah/) | proposed, no judge yet | |
 
-## Run a Flow card
+`bun judge/check.ts <problem> --score` prints a baseline; `bun judge/check.ts all --score` is the project
+score in `thompson.json` (their sum); `bun judge/check.ts <problem> --picture out` draws one.
+
+## Run a card
 
 From this directory, with a Thompson checkout at `$T`:
 
@@ -32,8 +40,8 @@ From this directory, with a Thompson checkout at `$T`:
 bun install
 bun $T/src/cli.ts init
 bun $T/src/cli.ts task "flow: cover the page more evenly" \
-  --accept "coverage beats the base on three commit-seeded fields" \
-  --verify "bun judge/flow/check.ts --base $(git rev-parse HEAD)"
+  --accept "the mean score beats the base on three commit-seeded worlds" \
+  --verify "bun judge/check.ts flow --base $(git rev-parse HEAD)"
 bun $T/adapters/refine/refine.ts --n 2 --d 2 --thompson "bun $T/src/cli.ts" --record docs/runs --json
 ```
 

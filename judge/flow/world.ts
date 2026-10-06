@@ -26,16 +26,8 @@ export interface FlowWorld {
 
 export interface FlowAgent { nextSeed(world: FlowWorld): Point | null }
 
-export function prng(seed: number): () => number {
-  let s = (seed >>> 0) || 1;
-  return () => {                                  // mulberry32
-    s = (s + 0x6d2b79f5) >>> 0;
-    let t = s;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
+export { prng } from "../lib";
+import { prng } from "../lib";
 
 // Two octaves of smooth value noise on a seeded lattice, in [0, 1).
 export function makeField(seed: number): (x: number, y: number) => number {
