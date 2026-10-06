@@ -38,16 +38,18 @@ function plan(n: number, edges: readonly (readonly [number, number])[], W: numbe
   edges.forEach(([a, b], k) => { inc[a].push(k); inc[b].push(k); });
   const local = (v: number) => {
     let c = 0;
-    for (const k of inc[v]) { const [a, b] = edges[k]; for (let q = 0; q < edges.length; q++) if (q !== k && !(inc[v].includes(q) && q < k)) c += cross(p, a, b, edges[q][0], edges[q][1]); }
+    for (const k of inc[v]) { const [a, b] = edges[k]; for (let q = 0; q < edges.length; q++) if (q !== k) c += cross(p, a, b, edges[q][0], edges[q][1]); }
     let o = 0;
     for (let j = 0; j < n; j++) if (j !== v && Math.hypot(p[2 * v] - p[2 * j], p[2 * v + 1] - p[2 * j + 1]) < 40) o++;
     let len = 0;
     for (const k of inc[v]) { const [a, b] = edges[k]; len += Math.abs(Math.hypot(p[2 * a] - p[2 * b], p[2 * a + 1] - p[2 * b + 1]) - rest); }
     return c * 1000 + o * 30 + len * 0.1;
   };
-  const IT = 200000;
+  const IT = 30000, t0 = performance.now();
   for (let it = 0; it < IT; it++) {
-    const v = Math.floor(rnd() * n), ox = p[2 * v], oy = p[2 * v + 1], before = local(v), sc = 80 * (1 - it / IT) + 3, temp = 800 * (1 - it / IT) ** 2;
+    const prog = Math.max(it / IT, (performance.now() - t0) / 2500);
+    if (prog >= 1) break;
+    const v = Math.floor(rnd() * n), ox = p[2 * v], oy = p[2 * v + 1], before = local(v), sc = 80 * (1 - prog) + 3, temp = 800 * (1 - prog) ** 2;
     if (rnd() < 0.5 && inc[v].length) {
       let cx = 0, cy = 0;
       for (const k of inc[v]) { const o = edges[k][0] === v ? edges[k][1] : edges[k][0]; cx += p[2 * o]; cy += p[2 * o + 1]; }
@@ -63,6 +65,9 @@ export const forces: WebAgent["forces"] = (p, ctx) => {
   const n = ctx.n, mem = ctx.memory;
   const target = (mem.t ??= plan(n, ctx.edges, ctx.width, ctx.height, ctx.random)) as Float64Array;
   const f = new Float64Array(2 * n);
-  for (let i = 0; i < n; i++) { f[2 * i] = target[2 * i] - p[2 * i]; f[2 * i + 1] = target[2 * i + 1] - p[2 * i + 1]; }
+  for (let i = 0; i < n; i++) { 
+    const dx = target[2 * i] - p[2 * i], dy = target[2 * i + 1] - p[2 * i + 1], l = Math.hypot(dx, dy), k = l > 8 ? 8 / l : 1;
+    f[2 * i] = dx * k; f[2 * i + 1] = dy * k;
+  }
   return f;
 };
