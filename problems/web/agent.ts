@@ -2,7 +2,7 @@
 // Self-contained: type imports only.
 import type { WebAgent } from "../../judge/web/world";
 
-// Plan once on step 0 (spring relaxation, then crossing-removing local search on a private copy of the
+// After M_6_1_03 (nodes repel, edges are springs). Plan once on step 0 (spring relaxation, then crossing-removing local search on a private copy of the
 // graph), then walk every node toward its planned spot at the allowed speed.
 const ccw = (ax: number, ay: number, bx: number, by: number, cx: number, cy: number) => (bx - ax) * (cy - ay) - (by - ay) * (cx - ax);
 const cross = (p: Float64Array, a: number, b: number, c: number, d: number) => {
@@ -45,10 +45,9 @@ function plan(n: number, edges: readonly (readonly [number, number])[], W: numbe
     for (const k of inc[v]) { const [a, b] = edges[k]; len += Math.abs(Math.hypot(p[2 * a] - p[2 * b], p[2 * a + 1] - p[2 * b + 1]) - rest); }
     return c * 1000 + o * 30 + len * 0.1;
   };
-  const IT = 30000, t0 = performance.now();
+  const IT = 30000;
   for (let it = 0; it < IT; it++) {
-    const prog = Math.max(it / IT, (performance.now() - t0) / 2500);
-    if (prog >= 1) break;
+    const prog = it / IT;
     const v = Math.floor(rnd() * n), ox = p[2 * v], oy = p[2 * v + 1], before = local(v), sc = 80 * (1 - prog) + 3, temp = 800 * (1 - prog) ** 2;
     if (rnd() < 0.5 && inc[v].length) {
       let cx = 0, cy = 0;
@@ -61,12 +60,13 @@ function plan(n: number, edges: readonly (readonly [number, number])[], W: numbe
   return p;
 }
 
+const MAX_MOVE = 8; // the judge's per-step limit in judge/web/world.ts
 export const forces: WebAgent["forces"] = (p, ctx) => {
   const n = ctx.n, mem = ctx.memory;
   const target = (mem.t ??= plan(n, ctx.edges, ctx.width, ctx.height, ctx.random)) as Float64Array;
   const f = new Float64Array(2 * n);
-  for (let i = 0; i < n; i++) { 
-    const dx = target[2 * i] - p[2 * i], dy = target[2 * i + 1] - p[2 * i + 1], l = Math.hypot(dx, dy), k = l > 8 ? 8 / l : 1;
+  for (let i = 0; i < n; i++) {
+    const dx = target[2 * i] - p[2 * i], dy = target[2 * i + 1] - p[2 * i + 1], l = Math.hypot(dx, dy), k = l > MAX_MOVE ? MAX_MOVE / l : 1;
     f[2 * i] = dx * k; f[2 * i + 1] = dy * k;
   }
   return f;
