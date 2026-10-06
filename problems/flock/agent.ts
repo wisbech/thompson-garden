@@ -5,12 +5,12 @@ import type { FlockAgent } from "../../judge/flock/world";
 // Rollout steering: for each candidate target heading fanned around "straight right", simulate the
 // judge's own turn-limited flight a few dozen steps ahead, charge for obstacles and neighbours met on
 // the way, add a small pull toward the goal heading and toward the current choice, fly the cheapest.
-const N = 17, FAN = 1.6, STEPS = 22, SPEED = 4, TURN = 0.3;
+// SPEED and TURN are the judge's SPEED and MAX_TURN (judge/flock/world.ts); offsets are in the same frame.
+const N = 17, FAN = 1.4, STEPS = 30, SPEED = 2, TURN = 0.15;
 const TN = 4;
-const MARGIN = 3, NEAR = 6, W_OBS = 100, W_NB = 500, W_GOAL = 2, W_KEEP = 1;
+const MARGIN = 3, NEAR = 6, W_OBS = 100, W_NB = 500, W_GOAL = 2, W_KEEP = 1, W_PROGRESS = 0.05;
 
 export const steer: FlockAgent["steer"] = (me, neighbours, obstacles, world) => {
-  if (obstacles.length === 0 && neighbours.length === 0) return 0;
   let best = 0, bestCost = Infinity;
   for (let k = 0; k < N; k++) {
     // centre outward, so the cheap straight options set the bound early
@@ -18,12 +18,15 @@ export const steer: FlockAgent["steer"] = (me, neighbours, obstacles, world) => 
     const target = -FAN + (2 * FAN * i) / (N - 1);
     let h = me.heading, x = 0, y = 0;
     let cost = W_GOAL * Math.abs(target) + W_KEEP * Math.abs(target - me.heading);
-    for (let t = 1; t <= STEPS && cost < bestCost; t++) {
+    let pruned = false;
+    for (let t = 1; t <= STEPS; t++) {
       let d = target - h;
       d = Math.atan2(Math.sin(d), Math.cos(d));
       h += Math.max(-TURN, Math.min(TURN, d));
       x += SPEED * Math.cos(h);
       y += SPEED * Math.sin(h);
+      // progress credit is taken step by step, so the running cost is the final cost so far
+      cost -= W_PROGRESS * SPEED * Math.cos(h);
       const w = 1 - t / (STEPS + 8);
       for (const o of obstacles) {
         const gap = Math.hypot(o.dx - x, o.dy - y) - o.r - MARGIN;
@@ -35,10 +38,10 @@ export const steer: FlockAgent["steer"] = (me, neighbours, obstacles, world) => 
         const dist = Math.hypot(n.dx + SPEED * t * Math.cos(n.heading) - x, n.dy + SPEED * t * Math.sin(n.heading) - y);
         if (dist < NEAR) cost += W_NB * (NEAR - dist) / NEAR * w;
       }
+      // every later step adds a non-negative charge and at most this much progress credit, so this bound is valid
+      if (cost - W_PROGRESS * SPEED * (STEPS - t) >= bestCost) { pruned = true; break; }
     }
-    // progress: how far right the rollout ends
-    cost -= 0.05 * x;
-    if (cost < bestCost) { bestCost = cost; best = target; }
+    if (!pruned && cost < bestCost) { bestCost = cost; best = target; }
   }
   return best;
 };
