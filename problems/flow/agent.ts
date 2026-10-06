@@ -2,7 +2,7 @@
 // It must stay self-contained (type imports only), because the check also loads the base's copy alone.
 import type { FlowWorld, Point } from "../../judge/flow/world";
 
-// Start each new trail just over one spacing beside an existing one (Jobard-Lefer seeding), taking
+// Start each new trail one spacing beside an existing one (Jobard-Lefer seeding), taking
 // trails in the order they were made so coverage grows outward; when no such place is left, fall back
 // to random starts. State is kept per world, so each run starts clean.
 interface Walk { queue: Point[]; head: number; done: number }
@@ -11,7 +11,7 @@ const walks = new WeakMap<FlowWorld, Walk>();
 export function nextSeed(world: FlowWorld): Point | null {
   let w = walks.get(world);
   if (!w) walks.set(world, w = { queue: [], head: 0, done: 0 });
-  const d = world.spacing * 1.01;
+  const d = world.spacing * 1.001;
   const ok = (x: number, y: number) => x >= 0 && y >= 0 && x < world.width && y < world.height && world.nearest(x, y) >= world.spacing;
   for (;;) {
     while (w.head < w.queue.length) {
