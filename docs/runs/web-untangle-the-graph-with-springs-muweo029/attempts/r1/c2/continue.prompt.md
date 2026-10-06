@@ -1,0 +1,90 @@
+# role: continue
+
+You are the worker on card web-untangle-the-graph-with-springs-muweo029: web: untangle the graph with springs.
+
+The working directory holds your previous attempt; its diff against the base is below. Extend or rewrite it so
+that every acceptance criterion holds. Edit files directly. Do not run the project's tests. Never edit a
+protected path.
+
+## Task
+web: untangle the graph with springs
+
+## Acceptance
+- problems/web/agent.ts scores higher than the base on three worlds seeded from the commit (bun judge/check.ts web --base <base>)
+- only problems/web/ changes; the agent keeps to the source rules in judge/check.ts
+
+## Context
+The web problem: read problems/web/README.md and judge/web/world.ts (the world, protected) first. Change only problems/web/agent.ts. Baseline 0.1368 on fixed seeds; bun judge/check.ts web --score prints the current score and bun judge/check.ts web --picture /tmp/web draws it.
+
+## Score (higher is better)
+The project's own measure, 1.230212 at the base (command: bun judge/check.ts all --score; higher is better). Within the acceptance criteria, the bigger the rise the better; a change
+that passes the check by the smallest possible margin is a weak result.
+
+## Protected paths (never edit)
+checks/
+src/kernel/
+KERNEL.md
+CODEOWNERS
+thompson.json
+package.json
+bunfig.toml
+bun.lock
+bun.lockb
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+judge/
+site/
+docs/
+tsconfig.json
+README.md
+
+Mechanism paths (this is an ordinary card; a rollout that touches them is refused by the host before the judge):
+adapters/
+src/
+
+## Current diff
+```diff
+diff --git a/problems/web/agent.ts b/problems/web/agent.ts
+index b130ebe..c4b6141 100644
+--- a/problems/web/agent.ts
++++ b/problems/web/agent.ts
+@@ -2,20 +2,26 @@
+ // Self-contained: type imports only.
+ import type { WebAgent } from "../../judge/web/world";
+ 
+-// Baseline, after M_6_1_03: every node repels every other within 100 px, every edge is a spring of
+-// rest length 60, velocities damped by half each step.
++// Fruchterman-Reingold with cooling: every pair repels as k^2/d, every edge pulls as d^2/k, and the
++// step each node may take shrinks over the run so the layout settles once it has untangled.
+ export const forces: WebAgent["forces"] = (p, ctx) => {
+-  const n = ctx.n, v = (ctx.memory.v ??= new Float64Array(2 * n)) as Float64Array;
+-  const f = new Float64Array(2 * n);
+-  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
+-    if (i === j) continue;
++  const n = ctx.n, f = new Float64Array(2 * n);
++  const k = Math.sqrt((ctx.width - 20) * (ctx.height - 20) / n) * 0.35;
++  for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
+     const dx = p[2 * i] - p[2 * j], dy = p[2 * i + 1] - p[2 * j + 1], d = Math.hypot(dx, dy) || 0.01;
+-    if (d < 100) { const s = (100 - d) / 100 * 2; f[2 * i] += dx / d * s; f[2 * i + 1] += dy / d * s; }
++    const s = k * k / d / d;
++    f[2 * i] += dx * s; f[2 * i + 1] += dy * s; f[2 * j] -= dx * s; f[2 * j + 1] -= dy * s;
+   }
+   for (const [a, b] of ctx.edges) {
+-    const dx = p[2 * b] - p[2 * a], dy = p[2 * b + 1] - p[2 * a + 1], d = Math.hypot(dx, dy) || 0.01, s = (d - 60) * 0.05;
+-    f[2 * a] += dx / d * s; f[2 * a + 1] += dy / d * s; f[2 * b] -= dx / d * s; f[2 * b + 1] -= dy / d * s;
++    const dx = p[2 * b] - p[2 * a], dy = p[2 * b + 1] - p[2 * a + 1], d = Math.hypot(dx, dy) || 0.01, s = d / k;
++    f[2 * a] += dx * s; f[2 * a + 1] += dy * s; f[2 * b] -= dx * s; f[2 * b + 1] -= dy * s;
+   }
+-  for (let k = 0; k < 2 * n; k++) { v[k] = (v[k] + f[k]) * 0.5; }
+-  return v;
++  // one monotone cooling from the world's own step budget; no reheating
++  const frac = Math.min(1, Math.max(0, (ctx.step || 0) / (ctx.steps || 600))), t = 8 * (1 - frac) ** 2 + 0.1;
++  const out = new Float64Array(2 * n);
++  for (let i = 0; i < n; i++) {
++    const len = Math.hypot(f[2 * i], f[2 * i + 1]) || 1, m = Math.min(len, t) / len;
++    out[2 * i] = f[2 * i] * m; out[2 * i + 1] = f[2 * i + 1] * m;
++  }
++  return out;
+ };
+```

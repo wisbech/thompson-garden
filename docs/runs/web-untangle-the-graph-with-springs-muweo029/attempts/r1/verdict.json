@@ -1,0 +1,12 @@
+{
+  "branch": "refine/web-untangle-the-graph-with-springs-muweo029/r1",
+  "sha": "6e851edb492c698838711acbf0f621828dabe87e",
+  "passed": true,
+  "exitCode": 0,
+  "cycles": 2,
+  "cost": 39307,
+  "score": 1.223601,
+  "judgeSec": 8.600000000000001,
+  "recordSha256": "207a82b33b1fc1145cfe2db8760ba008916e9869e2ba4d0c22f754b56fd89efa",
+  "output": "✓ setup-1  exit 0  0.0s  bun install --frozen-lockfile\n  ✓ verify   exit 0  1.4s  bun judge/check.ts web --base 392c31ec3c0380d33ef15e64b86be0f9e7f3d102\n  ✓ gate-1   exit 0  5.4s  bun test --timeout 120000\n  ✓ gate-2   exit 0  1.8s  bunx tsc --noEmit\n  PASSED web-untangle-the-graph-with-springs-muweo029 at 6e851edb492c  (ratified: no, base 392c31ec3c03)"
+}

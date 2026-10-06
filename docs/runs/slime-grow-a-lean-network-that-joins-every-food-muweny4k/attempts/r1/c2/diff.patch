@@ -1,0 +1,22 @@
+diff --git a/problems/slime/agent.ts b/problems/slime/agent.ts
+index 8b5bc50..65582ad 100644
+--- a/problems/slime/agent.ts
++++ b/problems/slime/agent.ts
+@@ -2,11 +2,14 @@
+ // Self-contained: type imports only.
+ import type { SlimeAgent } from "../../judge/slime/world";
+ 
+-// Baseline: Jones' (2010) rule and angles: sensors at 45°, 9 cells out, turn 45° toward the strongest.
+-export const params: SlimeAgent["params"] = { sensorAngle: Math.PI / 4, sensorDistance: 9, stepSize: 1, deposit: 1 };
++// Slightly wider sensors reaching a little further than the baseline (45°, 9 cells). A modest reach lets
++// agents sense distant trails and food without blurring neighbouring trails into a thick network.
++// One constant drives both the sensor angle and the turn angle so they cannot drift apart.
++const ANGLE = 0.8;
++export const params: SlimeAgent["params"] = { sensorAngle: ANGLE, sensorDistance: 12, stepSize: 1, deposit: 1 };
+ 
+ export const turn: SlimeAgent["turn"] = ({ left, center, right }, random) => {
+-  const ra = Math.PI / 4;
++  const ra = ANGLE;
+   if (center >= left && center >= right) return 0;
+   if (center < left && center < right) return random() < 0.5 ? -ra : ra;
+   return left > right ? -ra : ra;

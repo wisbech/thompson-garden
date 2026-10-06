@@ -1,0 +1,7 @@
+I reworked `turn` in `problems/slime/agent.ts` to address problems 1, 2 and 4. I did not run `bun judge/check.ts slime --base <base>`, because the brief said not to run tests. So I haven't measured the score or checked the source rules.
+
+- **Problem 1 (food repels):** sensor attraction now saturates at `TARGET` instead of measuring distance from it. Trail at or above `TARGET`, including food at 10, attracts fully, and only the surplus is ignored. The old comment about food pushing agents out along straight rays is gone.
+- **Problem 2 (target level):** with saturation, an unreachable `TARGET` no longer matters. Below it, agents climb toward the stronger trail as they did before. The comment says only that `TARGET` is a little above the network threshold. It no longer claims 2.5 is a stable equilibrium.
+- **Problem 4 (ties):** when the centre sensor is at least as strong as both sides, the agent now gets a ±0.05 rad jitter instead of returning 0. Equal saturated readings then no longer send agents along perfectly parallel lines.
+- **Problem 3 (walls):** I only fixed the comment. Reading `judge/slime/world.ts`, the world already reflects agents at the walls with a random new heading, so lost agents that drift straight are not stuck.
+- **Problem 3 (parameters):** I left `params` unchanged, so the effect of each change is still unattributed. Attributing them would take separate score runs.

@@ -1,0 +1,104 @@
+# role: critique
+
+You are the critic on card flock-get-the-swarm-through-the-obstacles-muweo1q4: flock: get the swarm through the obstacles. Read the diff below against the task and the acceptance criteria.
+Assume every change is wrong until the diff itself justifies it; the burden of proof is on the diff, not on you.
+
+Name concrete errors only: wrong logic, a missing case, a criterion the diff does not meet, an edit to a
+protected path, a change the task did not ask for. Do not edit any file and do not run anything.
+
+Reply in this form, one line per acceptance criterion, in their order:
+
+CRITERIA:
+- 1: pass|fail|uncertain — the evidence in the diff, in one line
+- 2: ...
+PROBLEMS:
+1. <file>: <what is wrong and what to change>
+2. ...
+
+If every criterion passes and you find no problem, end your reply with a line that is exactly: LGTM
+
+## Task
+flock: get the swarm through the obstacles
+
+## Acceptance
+- problems/flock/agent.ts scores higher than the base on three worlds seeded from the commit (bun judge/check.ts flock --base <base>)
+- only problems/flock/ changes; the agent keeps to the source rules in judge/check.ts
+
+## Protected paths
+checks/
+src/kernel/
+KERNEL.md
+CODEOWNERS
+thompson.json
+package.json
+bunfig.toml
+bun.lock
+bun.lockb
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+judge/
+site/
+docs/
+tsconfig.json
+README.md
+
+Mechanism paths (this is an ordinary card; a rollout that touches them is refused by the host before the judge):
+adapters/
+src/
+
+## Diff
+```diff
+diff --git a/problems/flock/agent.ts b/problems/flock/agent.ts
+index bea04d8..87b37a4 100644
+--- a/problems/flock/agent.ts
++++ b/problems/flock/agent.ts
+@@ -1,6 +1,44 @@
+-// The Flock agent: the heading each agent wants. The only file a Flock card changes.
++// Flock agent. Edit this file only.
+ // Self-contained: type imports only.
+ import type { FlockAgent } from "../../judge/flock/world";
+ 
+-// Baseline, the "stupid agent" of P_2_2_1 given a goal: head straight for the right edge.
+-export const steer: FlockAgent["steer"] = () => 0;
++// Rollout steering: for each candidate target heading fanned around "straight right", simulate the
++// judge's own turn-limited flight a few dozen steps ahead, charge for obstacles and neighbours met on
++// the way, add a small pull toward the goal heading and toward the current choice, fly the cheapest.
++const N = 17, FAN = 1.6, STEPS = 22, SPEED = 4, TURN = 0.3;
++const TN = 4;
++const MARGIN = 3, NEAR = 6, W_OBS = 100, W_NB = 500, W_GOAL = 2, W_KEEP = 1;
++
++export const steer: FlockAgent["steer"] = (me, neighbours, obstacles, world) => {
++  if (obstacles.length === 0 && neighbours.length === 0) return 0;
++  let best = 0, bestCost = Infinity;
++  for (let k = 0; k < N; k++) {
++    // centre outward, so the cheap straight options set the bound early
++    const i = (N >> 1) + (k & 1 ? (k + 1) >> 1 : -(k >> 1));
++    const target = -FAN + (2 * FAN * i) / (N - 1);
++    let h = me.heading, x = 0, y = 0;
++    let cost = W_GOAL * Math.abs(target) + W_KEEP * Math.abs(target - me.heading);
++    for (let t = 1; t <= STEPS && cost < bestCost; t++) {
++      let d = target - h;
++      d = Math.atan2(Math.sin(d), Math.cos(d));
++      h += Math.max(-TURN, Math.min(TURN, d));
++      x += SPEED * Math.cos(h);
++      y += SPEED * Math.sin(h);
++      const w = 1 - t / (STEPS + 8);
++      for (const o of obstacles) {
++        const gap = Math.hypot(o.dx - x, o.dy - y) - o.r - MARGIN;
++        if (gap < 0) cost += W_OBS * w * (1 - gap / MARGIN);
++      }
++      const py = me.y + y;
++      if (py < 6 || py > world.height - 6) cost += 3;
++      if (t <= TN) for (const n of neighbours) {
++        const dist = Math.hypot(n.dx + SPEED * t * Math.cos(n.heading) - x, n.dy + SPEED * t * Math.sin(n.heading) - y);
++        if (dist < NEAR) cost += W_NB * (NEAR - dist) / NEAR * w;
++      }
++    }
++    // progress: how far right the rollout ends
++    cost -= 0.05 * x;
++    if (cost < bestCost) { bestCost = cost; best = target; }
++  }
++  return best;
++};
+```

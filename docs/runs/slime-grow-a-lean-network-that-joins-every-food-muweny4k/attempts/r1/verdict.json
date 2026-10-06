@@ -1,0 +1,12 @@
+{
+  "branch": "refine/slime-grow-a-lean-network-that-joins-every-food-muweny4k/r1",
+  "sha": "9fd64aff48d2dbe58f7133622fe64f86e89b916e",
+  "passed": false,
+  "exitCode": 1,
+  "cycles": 2,
+  "cost": 24259,
+  "score": null,
+  "judgeSec": 14.7,
+  "recordSha256": "c865a14bea2361b6de0be6f6399d6056cc6a6993c7c3f3646db9e6088f6ef9a5",
+  "output": "✓ setup-1  exit 0  0.0s  bun install --frozen-lockfile\n  ✗ verify   exit 1  14.7s  bun judge/check.ts slime --base 392c31ec3c0380d33ef15e64b86be0f9e7f3d102\n      slime: base 0.0643  head 0.0511  on seeds 1533785389, 2363858375, 2763099960\n      {\"problem\":\"slime\",\"passed\":false,\"base\":{\"sha\":\"392c31ec3c0380d33ef15e64b86be0f9e7f3d102\",\"mean\":0.06430042843458561,\"runs\":[{\"seed\":1533785389,\"score\":0.17290128530375684,\"connected\":true,\"pairsJoined\":1,\"cells\":3775,\"mst\":275.20235202168203},{\"seed\":2363858375,\"score\":0.006666666666666667,\"connected\":false,\"pairsJoined\":0.06666666666666667,\"cells\":3370,\"mst\":266.8373459938629},{\"seed\":2763099960,\"score\":0.013333333333333334,\"connected\":false,\"pairsJoined\":0.13333333333333333,\"cells\":3625,\"mst\":237.4306481781879}]},\"head\":{\"sha\":\"9fd64aff48d2dbe58f7133622fe64f86e89b916e\",\"mean\":0.05111111111111111,\"runs\":[{\"seed\":1533785389,\"score\":0.06666666666666667,\"connected\":false,\"pairsJoined\":0.6666666666666666,\"cells\":4593,\"mst\":275.20235202168203},{\"seed\":2363858375,\"score\":0.020000000000000004,\"connected\":false,\"pairsJoined\":0.2,\"cells\":3501,\"mst\":266.8373459938629},{\"seed\":2763099960,\"score\":0.06666666666666667,\"connected\":false,\"pairsJoined\":0.6666666666666666,\"cells\":4927,\"mst\":237.4306481781879}]},\"seeds\":[1533785389,2363858375,2763099960]}\n  FAILED slime-grow-a-lean-network-that-joins-every-food-muweny4k at 9fd64aff48d2  (ratified: no, base 392c31ec3c03)"
+}

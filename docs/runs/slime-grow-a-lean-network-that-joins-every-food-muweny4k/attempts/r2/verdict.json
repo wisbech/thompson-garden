@@ -1,0 +1,12 @@
+{
+  "branch": "refine/slime-grow-a-lean-network-that-joins-every-food-muweny4k/r2",
+  "sha": "9f60139da256612955c4598292dafa363a4b751c",
+  "passed": true,
+  "exitCode": 0,
+  "cycles": 2,
+  "cost": 30031,
+  "score": 1.321983,
+  "judgeSec": 20.7,
+  "recordSha256": "73916059ffbc335f0b97a801d221af015866bb2e25a4556c0a9e6c4d5be5d012",
+  "output": "✓ setup-1  exit 0  0.0s  bun install --frozen-lockfile\n  ✓ verify   exit 0  14.1s  bun judge/check.ts slime --base 392c31ec3c0380d33ef15e64b86be0f9e7f3d102\n  ✓ gate-1   exit 0  4.7s  bun test --timeout 120000\n  ✓ gate-2   exit 0  1.9s  bunx tsc --noEmit\n  PASSED slime-grow-a-lean-network-that-joins-every-food-muweny4k at 9f60139da256  (ratified: no, base 392c31ec3c03)"
+}

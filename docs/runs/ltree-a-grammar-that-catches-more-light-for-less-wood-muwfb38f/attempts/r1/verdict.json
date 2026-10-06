@@ -1,0 +1,12 @@
+{
+  "branch": "refine/ltree-a-grammar-that-catches-more-light-for-less-wood-muwfb38f/r1",
+  "sha": "423ba58947a506e3f109e7be8d3664d2a0c57ac0",
+  "passed": true,
+  "exitCode": 0,
+  "cycles": 2,
+  "cost": 24605,
+  "score": 1.476046,
+  "judgeSec": 6.3999999999999995,
+  "recordSha256": "45991b5d6ae2f402ec60ff8bf13cc147f97ff9b260987467cd2a47004f03c383",
+  "output": "✓ setup-1  exit 0  0.0s  bun install --frozen-lockfile\n  ✓ verify   exit 0  0.1s  bun judge/check.ts ltree --base 842899608b6dcfaca1235bfb3d60c653733d8494\n  ✓ gate-1   exit 0  4.5s  bun test --timeout 120000\n  ✓ gate-2   exit 0  1.8s  bunx tsc --noEmit\n  PASSED ltree-a-grammar-that-catches-more-light-for-less-wood-muwfb38f at 423ba58947a5  (ratified: no, base 842899608b6d)"
+}

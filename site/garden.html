@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Thompson Garden</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0}
+
+/* Layout: a quiet Nordic catalogue. One centred column, generous air, each plot a pair of live frames: planted (before) and kept (after). */
+:root {
+  --linen: #F2F0EB; --paper: #FAF9F6; --ink: #2B2E2C; --muted: #7C817D; --rule: #E1DDD5;
+  --sage: #6F8F7A; --sand: #C2AE8F; --rust: #B26B4A; --mist: #93A6B4;
+  --sans: "Albert Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono: "DM Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --linen: #1B1D1C; --paper: #222523; --ink: #E8E5DF; --muted: #9AA09B; --rule: #343834;
+  --sage: #8FB09A; --sand: #CDB997; --rust: #D08A68; --mist: #A9BBC8; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --linen: #1B1D1C; --paper: #222523; --ink: #E8E5DF; --muted: #9AA09B; --rule: #343834;
+  --sage: #8FB09A; --sand: #CDB997; --rust: #D08A68; --mist: #A9BBC8; color-scheme: dark }
+
+body { background: var(--linen); color: var(--ink); font: 300 17px/1.65 var(--sans); }
+.wrap { max-width: 1080px; margin: 0 auto; padding-inline: 24px; padding-block: 72px 120px; }
+header { display: grid; gap: 18px; margin-bottom: 72px; }
+.kicker { font: 400 12px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+h1 { font: 300 clamp(44px, 7vw, 84px)/1 var(--sans); letter-spacing: -.03em; margin: 0; text-wrap: balance; }
+h1 b { font-weight: 600; }
+.lede { max-width: 58ch; margin: 0; color: var(--ink); font-size: 19px; }
+.lede-2 { max-width: 62ch; margin: 0; color: var(--muted); font-size: 15px; }
+a { color: var(--ink); text-decoration-color: var(--sand); text-underline-offset: 3px; }
+
+.tour { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 2px; margin-bottom: 96px; }
+.bed { background: var(--paper); padding: 22px 22px 24px; min-width: 0; }
+.bed .path { font: 400 13px var(--mono); color: var(--sage); }
+.bed h3 { font: 500 17px/1.3 var(--sans); margin: 8px 0 6px; }
+.bed p { font-size: 14.5px; color: var(--muted); margin: 0; }
+
+.plot { display: grid; gap: 22px; padding-block: 56px; border-top: 1px solid var(--rule); }
+.plot-head { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 8px 32px; align-items: end; }
+.plot h2 { font: 300 40px/1.05 var(--sans); letter-spacing: -.02em; margin: 0; }
+.plot h2 span { font: 400 12px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-left: 12px; vertical-align: middle; }
+.plot .about { margin: 0; max-width: 62ch; color: var(--muted); font-size: 15.5px; grid-column: 1 / -1; }
+.scores { display: flex; gap: 22px; font: 400 13px var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.scores b { display: block; font: 400 24px/1.1 var(--mono); color: var(--ink); }
+.scores .up b { color: var(--sage); }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+figure { margin: 0; background: var(--paper); border: 1px solid var(--rule); border-radius: 2px; min-width: 0; }
+figure canvas { display: block; width: 100%; max-width: 100%; }
+figcaption { display: flex; justify-content: space-between; gap: 12px; padding: 10px 14px 12px; font: 400 12.5px var(--mono); color: var(--muted); border-top: 1px solid var(--rule); font-variant-numeric: tabular-nums; }
+figcaption .who { color: var(--ink); }
+.note { margin: 0; font-size: 14.5px; max-width: 70ch; padding-left: 14px; border-left: 2px solid var(--rust); }
+.note b { font-weight: 500; }
+.controls { display: flex; gap: 10px; }
+button { font: 400 12.5px var(--mono); color: var(--ink); background: transparent; border: 1px solid var(--rule); border-radius: 2px; padding: 6px 12px; cursor: pointer; }
+button:hover { border-color: var(--sand); }
+button:focus-visible { outline: 2px solid var(--sage); outline-offset: 2px; }
+footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--rule); font-size: 14px; color: var(--muted); display: grid; gap: 6px; }
+footer code { font: 400 13px var(--mono); }
+
+@media (max-width: 760px) {
+  .wrap { padding-inline: 16px; padding-block: 40px 80px; }
+  .tour { grid-template-columns: minmax(0,1fr); }
+  .pair { grid-template-columns: minmax(0,1fr); }
+  .plot-head { grid-template-columns: minmax(0,1fr); }
+  .plot h2 { font-size: 32px; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="kicker">wisbech/thompson-garden · 6 October 2026</div>
+    <h1>Thompson <b>Garden</b></h1>
+    <p class="lede">Six agent problems after the Generative Design 02_M sketches. Each is a card Thompson ran: two model rollouts, a critic inside each attempt, and a judge that runs the world and keeps only what scores higher.</p>
+    <p class="lede-2">Every frame below is computed live in your browser from the same code the judge runs. On the left, the agent we planted. On the right, the agent Thompson kept. Both run in the same world (fixed seed 1); the scores in each heading are means over the three fixed seeds.</p>
+  </header>
+
+  <section class="tour" aria-label="A walk around the garden">
+    <div class="bed"><div class="path">judge/</div><h3>The fence</h3><p>Each problem's world, its check and its tests. People tend it; no card may touch it.</p></div>
+    <div class="bed"><div class="path">problems/&lt;name&gt;/agent.ts</div><h3>The beds</h3><p>One small file per problem: the agent. This is the only thing a card is allowed to change.</p></div>
+    <div class="bed"><div class="path">docs/runs/&lt;card&gt;/</div><h3>The record</h3><p>Every prompt, reply, critique, diff and verdict of a run, kept whole. You merge by hand after reading it.</p></div>
+  </section>
+
+  <main id="plots"></main>
+
+  <footer>
+    <div>Repository: <a href="https://github.com/wisbech/thompson-garden">github.com/wisbech/thompson-garden</a>. Kept agents wait on branches <code>thompson/&lt;card&gt;</code> for you to merge.</div>
+    <div>Agents run inside the judge's process, so the check refuses agents that import more than types, reach for <code>process</code> or <code>eval</code>, or rewrite built-ins.</div>
+  </footer>
+</div>
+
+<script>(()=>{var we=Object.defineProperty;var Ae=(t)=>t;function Fe(t,r){this[t]=Ae.bind(null,r)}var T=(t,r)=>{for(var s in r)we(t,s,{get:r[s],enumerable:!0,configurable:!0,set:Fe.bind(r,s)})};var bt={};T(bt,{HEIGHT:()=>U,MAX_CALLS:()=>Ut,MAX_POINTS:()=>Ht,MIN_POINTS:()=>Gt,SPACING:()=>st,STEP:()=>pt,WIDTH:()=>H,coverage:()=>Yt,makeField:()=>qt,minSeparation:()=>Ee,prng:()=>k,run:()=>Se,toSvg:()=>$e});function k(t){let r=t>>>0||1;return()=>{r=r+1831565813>>>0;let s=r;return s=Math.imul(s^s>>>15,s|1),s^=s+Math.imul(s^s>>>7,s|61),((s^s>>>14)>>>0)/4294967296}}function ot(t,r,s,l,o,n,e,c){let m=(h,p,x,M,A,y)=>(x-h)*(y-p)-(M-p)*(A-h),a=m(o,n,e,c,t,r),u=m(o,n,e,c,s,l),g=m(t,r,s,l,o,n),i=m(t,r,s,l,e,c);return(a>0.000000001&&u<-0.000000001||a<-0.000000001&&u>0.000000001)&&(g>0.000000001&&i<-0.000000001||g<-0.000000001&&i>0.000000001)}var C="#1F6B57",G="#FAFBF8",B="#9A6B0C";var H=1000,U=600,st=12,pt=st/3,Gt=10,Ht=2000,Ut=200000;function qt(t){let r=k(t),s=256,l=Float64Array.from({length:65536},r),o=300+r()*200,n=2*Math.PI*(1.5+r()),e=(a,u)=>l[(u%256+256)%256*256+(a%256+256)%256],c=(a)=>a*a*(3-2*a),m=(a,u)=>{let g=Math.floor(a),i=Math.floor(u),h=c(a-g),p=c(u-i),x=e(g,i)+(e(g+1,i)-e(g,i))*h,M=e(g,i+1)+(e(g+1,i+1)-e(g,i+1))*h;return x+(M-x)*p};return(a,u)=>(m(a/o,u/o)*0.7+m(a/o*2+17,u/o*2+31)*0.3)*n}function Se(t,r,s){let l=qt(r),o=k(r^2654435769),n=st,e=Math.ceil(H/n)+1,c=Math.ceil(U/n)+1,m=Array.from({length:e*c},()=>[]),a=[],u=0,g=0,i=function*(d,w,f){let F=Math.floor(d/n),S=Math.floor(w/n);for(let v=S-f;v<=S+f;v++)for(let R=F-f;R<=F+f;R++)if(R>=0&&v>=0&&R<e&&v<c)yield m[v*e+R]},h=(d,w)=>{let f=1/0;for(let F of i(d,w,2))for(let S of F)f=Math.min(f,Math.hypot(S.x-d,S.y-w));return f<=2*n?f:1/0},p=(d,w,f)=>{for(let F of i(d,w,1))for(let S of F)if((S.x-d)**2+(S.y-w)**2<f*f)return!0;return!1},x=(d,w)=>d>=0&&w>=0&&d<H&&w<U,M=(d,w)=>{if(!x(d,w)||p(d,w,n))return null;let f=[],F=new Map,S=0,v=(j,_)=>{let P=Math.floor(j/n),N=Math.floor(_/n);for(let D=N-1;D<=N+1;D++)for(let L=P-1;L<=P+1;L++)for(let J of F.get(D*e+L)??[])if(S-J.n>6&&(J.x-j)**2+(J.y-_)**2<(n/2)**2)return!0;return!1};for(let j of[1,-1]){let _=[],P=d,N=w;for(let D=0;D<Ht;D++){let L=l(P,N);if(P+=j*pt*Math.cos(L),N+=j*pt*Math.sin(L),!x(P,N)||p(P,N,n/2)||v(P,N))break;_.push([P,N]);let J=Math.floor(N/n)*e+Math.floor(P/n);F.set(J,[...F.get(J)??[],{x:P,y:N,n:S++}])}f.push(_)}let R=[...f[1].reverse(),[d,w],...f[0]];return R.length>=Gt?R:null},A={width:H,height:U,spacing:n,angle:l,trails:a,nearest:h,random:o,get calls(){return u},get missesInARow(){return g}},y=performance.now(),b="agent";for(;;){if(performance.now()-y>s){b="budget";break}if(u>=Ut){b="calls";break}u++;let d=t.nextSeed(A);if(d===null)break;let[w,f]=d,F=Number.isFinite(w)&&Number.isFinite(f)?M(w,f):null;if(!F){g++;continue}g=0;let S=a.length;F.forEach(([v,R],j)=>m[Math.floor(R/n)*e+Math.floor(v/n)].push({x:v,y:R,t:S,k:j})),a.push(F)}return{trails:a,coverage:Yt(a),calls:u,cut:b}}function Yt(t){let r=st,s=(r/2)**2,l=Math.ceil(H/r)+1,o=Math.ceil(U/r)+1,n=Array.from({length:l*o},()=>[]);for(let m of t)for(let a of m)n[Math.floor(a[1]/r)*l+Math.floor(a[0]/r)].push(a);let e=0,c=0;for(let m=r/4;m<U;m+=r/2)for(let a=r/4;a<H;a+=r/2){e++;let u=Math.floor(a/r),g=Math.floor(m/r);t:for(let i=g-1;i<=g+1;i++)for(let h=u-1;h<=u+1;h++){if(h<0||i<0||h>=l||i>=o)continue;for(let[p,x]of n[i*l+h])if((p-a)**2+(x-m)**2<=s){c++;break t}}}return c/e}function Ee(t){let r=1/0;for(let s=0;s<t.length;s++)for(let l=s+1;l<t.length;l++)for(let[o,n]of t[s])for(let[e,c]of t[l]){let m=Math.hypot(o-e,n-c);if(m<r)r=m}return r}function $e(t){let r=t.map((s)=>`<path d="M${s.map(([l,o])=>`${l.toFixed(1)} ${o.toFixed(1)}`).join("L")}"/>`).join(`
+`);return`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${H} ${U}" width="${H}" height="${U}">
+<rect width="100%" height="100%" fill="#FAFBF8"/>
+<g fill="none" stroke="#1F6B57" stroke-width="1.2" stroke-linecap="round">
+${r}
+</g>
+</svg>
+`}var gt={};T(gt,{AGENTS:()=>Q,DECAY:()=>Vt,FOODS:()=>zt,FOOD_TRAIL:()=>Jt,H:()=>I,MAX_DEPOSIT:()=>ee,MAX_SENSOR:()=>Zt,MAX_STEP:()=>te,STEPS:()=>Kt,THRESHOLD:()=>Qt,W:()=>E,foodsFor:()=>re,measure:()=>oe,mstLength:()=>ne,run:()=>Ne});var E=200,I=120,Q=3000,Kt=600,zt=6,Vt=0.1,Jt=10,Qt=1.5,Zt=20,te=2,ee=5;function re(t){let r=k(t^81),s=[];while(s.length<zt){let l=[Math.floor(15+r()*(E-30)),Math.floor(12+r()*(I-24))];if(s.every(([o,n])=>Math.hypot(o-l[0],n-l[1])>30))s.push(l)}return s}function ne(t){let r=[0],s=t.map((o,n)=>n).slice(1),l=0;while(s.length){let o=1/0,n=0;for(let e of r)s.forEach((c,m)=>{let a=Math.hypot(t[e][0]-t[c][0],t[e][1]-t[c][1]);if(a<o)o=a,n=m});l+=o,r.push(s.splice(n,1)[0])}return l}function Ne(t,r,s,l){let o=k(r^42405),n=re(r),e=t.params,c=Math.max(0,Math.min(Math.PI,+e.sensorAngle||0)),m=Math.max(1,Math.min(Zt,+e.sensorDistance||1)),a=Math.max(0.2,Math.min(te,+e.stepSize||1)),u=Math.max(0,Math.min(ee,+e.deposit||0)),g=new Float32Array(E*I),i=new Float32Array(E*I),h=new Float64Array(Q),p=new Float64Array(Q),x=new Float64Array(Q);for(let y=0;y<Q;y++)h[y]=o()*E,p[y]=o()*I,x[y]=o()*Math.PI*2;let M=(y,b)=>{let d=Math.floor((y%E+E)%E),w=Math.floor((b%I+I)%I);return g[w*E+d]},A=performance.now();for(let y=0;y<Kt;y++){if(performance.now()-A>s)break;for(let[b,d]of n)for(let w=-1;w<=1;w++)for(let f=-1;f<=1;f++)g[(d+w)*E+b+f]=Jt;for(let b=0;b<Q;b++){let d=(S)=>M(h[b]+m*Math.cos(x[b]+S),p[b]+m*Math.sin(x[b]+S)),w=t.turn({left:d(-c),center:d(0),right:d(c),step:y},o);w=Number.isFinite(w)?Math.max(-Math.PI/2,Math.min(Math.PI/2,w)):0,x[b]+=w;let f=h[b]+a*Math.cos(x[b]),F=p[b]+a*Math.sin(x[b]);if(f<0||F<0||f>=E||F>=I)x[b]=o()*Math.PI*2,f=Math.min(E-0.01,Math.max(0,f)),F=Math.min(I-0.01,Math.max(0,F));h[b]=f,p[b]=F,g[Math.floor(F)*E+Math.floor(f)]+=u}for(let b=0;b<I;b++)for(let d=0;d<E;d++){let w=0,f=0;for(let F=-1;F<=1;F++)for(let S=-1;S<=1;S++){let v=d+S,R=b+F;if(v>=0&&R>=0&&v<E&&R<I)w+=g[R*E+v],f++}i[b*E+d]=w/f*(1-Vt)}[g,i]=[i,g],l?.(y,g)}return oe(g,n)}function oe(t,r){let s=new Uint8Array(E*I),l=0;for(let i=0;i<E*I;i++)if(t[i]>=Qt)s[i]=1,l++;let o=new Int32Array(E*I).fill(-1),n=0;for(let i=0;i<E*I;i++){if(!s[i]||o[i]>=0)continue;let h=[i];o[i]=n;while(h.length){let p=h.pop(),x=p%E,M=(p-x)/E;for(let[A,y]of[[x+1,M],[x-1,M],[x,M+1],[x,M-1]]){if(A<0||y<0||A>=E||y>=I)continue;let b=y*E+A;if(s[b]&&o[b]<0)o[b]=n,h.push(b)}}n++}let e=r.map(([i,h])=>s[h*E+i]?o[h*E+i]:-1),c=0,m=0;for(let i=0;i<e.length;i++)for(let h=i+1;h<e.length;h++)if(m++,e[i]>=0&&e[i]===e[h])c++;let a=c===m,u=ne(r);return{score:a?0.1+u/Math.max(l,1):0.1*(c/m),connected:a,pairs:c/m,cells:l,mst:u,trail:t,foods:r,network:s}}var dt={};T(dt,{HEIGHT:()=>tt,MARGIN:()=>X,MAX_MOVE:()=>at,RADIUS:()=>yt,SIDE:()=>W,STEPS:()=>xt,WIDTH:()=>Z,graphFor:()=>se,measure:()=>ae,picture:()=>Pe,run:()=>Re});var Z=800,tt=600,X=10,W=7,xt=600,at=8,yt=8;function se(t){let r=k(t^119),s=W*W,l=Array.from({length:s},(e,c)=>c);for(let e=s-1;e>0;e--){let c=Math.floor(r()*(e+1));[l[e],l[c]]=[l[c],l[e]]}let o=[];for(let e=0;e<W;e++)for(let c=0;c<W;c++){if(c+1<W)o.push([e*W+c,e*W+c+1]);if(e+1<W)o.push([e*W+c,(e+1)*W+c])}let n=[...o];for(let e of o){if(r()>0.15)continue;let c=n.filter((m)=>m!==e);if(ke(s,c))n.splice(n.indexOf(e),1)}return{n:s,edges:n.map(([e,c])=>[l[e],l[c]])}}function ke(t,r){let s=Array.from({length:t},()=>[]);for(let[n,e]of r)s[n].push(e),s[e].push(n);let l=new Set([0]),o=[0];while(o.length)for(let n of s[o.pop()])if(!l.has(n))l.add(n),o.push(n);return l.size===t}function Re(t,r,s,l){let{n:o,edges:n}=se(r),e=k(r^4660),c=new Float64Array(2*o);for(let u=0;u<o;u++)c[2*u]=X+e()*(Z-2*X),c[2*u+1]=X+e()*(tt-2*X);let m={},a=performance.now();for(let u=0;u<xt;u++){if(performance.now()-a>s)break;let g=t.forces(Float64Array.from(c),{n:o,edges:n,step:u,steps:xt,width:Z,height:tt,random:e,memory:m});for(let i=0;i<o;i++){let h=Number(g[2*i]),p=Number(g[2*i+1]);if(!Number.isFinite(h)||!Number.isFinite(p))continue;let x=Math.hypot(h,p);if(x>at)h*=at/x,p*=at/x;c[2*i]=Math.min(Z-X,Math.max(X,c[2*i]+h)),c[2*i+1]=Math.min(tt-X,Math.max(X,c[2*i+1]+p))}l?.(u,c)}return ae(c,n)}function ae(t,r){let s=0;for(let a=0;a<r.length;a++)for(let u=a+1;u<r.length;u++){let[g,i]=r[a],[h,p]=r[u];if(g===h||g===p||i===h||i===p)continue;if(ot(t[2*g],t[2*g+1],t[2*i],t[2*i+1],t[2*h],t[2*h+1],t[2*p],t[2*p+1]))s++}let l=0,o=t.length/2;for(let a=0;a<o;a++)for(let u=a+1;u<o;u++)if(Math.hypot(t[2*a]-t[2*u],t[2*a+1]-t[2*u+1])<2*yt)l++;let n=r.map(([a,u])=>Math.hypot(t[2*a]-t[2*u],t[2*a+1]-t[2*u+1])),e=n.reduce((a,u)=>a+u,0)/n.length,c=Math.sqrt(n.reduce((a,u)=>a+(u-e)**2,0)/n.length),m=e>0?Math.max(0,1-c/e):0;return{score:1/(1+s)+0.1*m-0.02*l,crossings:s,overlaps:l,evenness:m,positions:t,edges:r}}function Pe(t){let r=t.positions,s=t.edges.map(([o,n])=>`<line x1="${r[2*o].toFixed(1)}" y1="${r[2*o+1].toFixed(1)}" x2="${r[2*n].toFixed(1)}" y2="${r[2*n+1].toFixed(1)}"/>`).join(""),l=Array.from({length:r.length/2},(o,n)=>`<circle cx="${r[2*n].toFixed(1)}" cy="${r[2*n+1].toFixed(1)}" r="${yt/2}"/>`).join("");return`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${Z} ${tt}" width="${Z}" height="${tt}"><rect width="100%" height="100%" fill="${G}"/><g stroke="${C}" stroke-width="1.4">${s}</g><g fill="${B}">${l}</g></svg>
+`}var Et={};T(Et,{AGENTS:()=>O,BODY:()=>St,GOAL_X:()=>nt,HEIGHT:()=>q,MAX_TURN:()=>wt,SEE_AGENTS:()=>At,SEE_OBSTACLES:()=>Ft,SPEED:()=>Mt,STEPS:()=>ie,WIDTH:()=>et,obstaclesFor:()=>le,picture:()=>ve,run:()=>Te});var et=1000,q=600,O=200,ie=1500,Mt=2,wt=0.15,At=30,Ft=60,St=2,nt=et-20;function le(t){let r=k(t^61708),s=[];while(s.length<14){let l={x:180+r()*620,y:30+r()*(q-60),r:25+r()*35};if(s.every((o)=>Math.hypot(o.x-l.x,o.y-l.y)>o.r+l.r+12))s.push(l)}return s}function Te(t,r,s,l){let o=k(r^45085),n=le(r),e=new Float64Array(O),c=new Float64Array(O),m=new Float64Array(O),a=new Uint8Array(O),u=[];for(let b=0;b<O;b++)e[b]=10+o()*80,c[b]=20+o()*(q-40),m[b]=0,u.push([[e[b],c[b]]]);let g={width:et,height:q,goalX:nt,random:o},i=new Set,h=Ft,p=Math.ceil(et/h)+1,x=performance.now();for(let b=0;b<ie;b++){if(performance.now()-x>s)break;let d=new Map;for(let f=0;f<O;f++)if(a[f]===0){let F=Math.floor(c[f]/h)*p+Math.floor(e[f]/h);(d.get(F)??d.set(F,[]).get(F)).push(f)}let w=new Float64Array(O);for(let f=0;f<O;f++){if(a[f]!==0)continue;let F=[],S=[],v=Math.floor(e[f]/h),R=Math.floor(c[f]/h);for(let _=R-1;_<=R+1;_++)for(let P=v-1;P<=v+1;P++)for(let N of d.get(_*p+P)??[]){if(N===f)continue;let D=e[N]-e[f],L=c[N]-c[f];if(D*D+L*L<=At*At)F.push({dx:D,dy:L,heading:m[N]})}for(let _ of n){let P=_.x-e[f],N=_.y-c[f];if(Math.hypot(P,N)-_.r<=Ft)S.push({dx:P,dy:N,r:_.r})}let j=t.steer({x:e[f],y:c[f],heading:m[f]},F,S,g);w[f]=Number.isFinite(j)?j:m[f]}for(let f=0;f<O;f++){if(a[f]!==0)continue;let F=w[f]-m[f];if(F=Math.atan2(Math.sin(F),Math.cos(F)),m[f]+=Math.max(-wt,Math.min(wt,F)),e[f]+=Mt*Math.cos(m[f]),c[f]=Math.min(q-1,Math.max(1,c[f]+Mt*Math.sin(m[f]))),e[f]=Math.max(1,e[f]),b%4===0)u[f].push([e[f],c[f]]);if(e[f]>=nt){a[f]=1,u[f].push([e[f],c[f]]);continue}if(n.some((S)=>Math.hypot(S.x-e[f],S.y-c[f])<S.r))a[f]=2,u[f].push([e[f],c[f]])}for(let f=0;f<O;f++)if(a[f]===0){for(let F=f+1;F<O;F++)if(a[F]===0&&Math.abs(e[f]-e[F])<2*St&&Math.hypot(e[f]-e[F],c[f]-c[F])<2*St)i.add(f*O+F)}l?.(b,e,c,m,a)}let M=0,A=0,y=i.size;for(let b=0;b<O;b++){if(a[b]===1)M++;if(a[b]===2)A++}return{score:M/O-0.002*y,arrived:M,died:A,collisions:y,paths:u,obstacles:n}}function ve(t){let r=t.obstacles.map((l)=>`<circle cx="${l.x.toFixed(1)}" cy="${l.y.toFixed(1)}" r="${l.r.toFixed(1)}"/>`).join(""),s=t.paths.map((l)=>`<path d="M${l.map(([o,n])=>`${o.toFixed(1)} ${n.toFixed(1)}`).join("L")}"/>`).join("");return`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${et} ${q}" width="${et}" height="${q}"><rect width="100%" height="100%" fill="${G}"/><g fill="${B}" fill-opacity="0.25" stroke="${B}">${r}</g><g fill="none" stroke="${C}" stroke-width="0.8" stroke-opacity="0.55">${s}</g><line x1="${nt}" y1="0" x2="${nt}" y2="${q}" stroke="${B}" stroke-dasharray="4 4"/></svg>
+`}var Nt={};T(Nt,{HEIGHT:()=>V,LEAF:()=>ct,MAX_NODES:()=>$t,RAYS:()=>it,ROOT:()=>lt,WIDTH:()=>z,WOOD_SCALE:()=>ce,measure:()=>he,picture:()=>Oe,run:()=>Ie,sunsFor:()=>me,validate:()=>ue});var z=800,V=600,lt=[400,600],$t=3000,ct=5,it=600,ce=200000;function me(t){let r=k(t^1441);return[-1,0,1].map((s)=>s*0.45+(r()-0.5)*0.3)}function ue(t){if(!Array.isArray(t)||t.length<2)return"fewer than two nodes";if(t.length>$t)return`more than ${$t} nodes`;let r=t[0];if(r.parent!==-1||Math.abs(r.x-lt[0])>0.000001||Math.abs(r.y-lt[1])>0.000001)return"node 0 is not the root";for(let o=1;o<t.length;o++){let n=t[o];if(!Number.isInteger(n.parent)||n.parent<0||n.parent>=o)return`node ${o} has a bad parent`;if(!Number.isFinite(n.x)||!Number.isFinite(n.y)||n.x<0||n.x>z||n.y<0||n.y>V)return`node ${o} is outside the frame`;let e=t[n.parent];if(Math.hypot(n.x-e.x,n.y-e.y)<0.5)return`node ${o} sits on its parent`}let s=t.slice(1).map((o,n)=>({a:o.parent,b:n+1})),l=s.map(({a:o,b:n})=>[Math.min(t[o].x,t[n].x),Math.max(t[o].x,t[n].x),Math.min(t[o].y,t[n].y),Math.max(t[o].y,t[n].y)]);for(let o=0;o<s.length;o++)for(let n=o+1;n<s.length;n++){let e=s[o],c=s[n];if(e.a===c.a||e.a===c.b||e.b===c.a||e.b===c.b)continue;let m=l[o],a=l[n];if(m[1]<a[0]||a[1]<m[0]||m[3]<a[2]||a[3]<m[2])continue;if(ot(t[e.a].x,t[e.a].y,t[e.b].x,t[e.b].y,t[c.a].x,t[c.a].y,t[c.b].x,t[c.b].y))return`segments ${o+1} and ${n+1} cross`}return""}function he(t,r){let s=ue(t);if(s)return{score:-1,valid:!1,reason:s,light:0,wood:0,leaves:0,nodes:Array.isArray(t)?t:[],area:[],suns:r};let l=Array(t.length).fill(0),o=Array(t.length).fill(0);for(let m=1;m<t.length;m++)l[t[m].parent]++;for(let m=t.length-1;m>=1;m--){if(l[m]===0)o[m]=1;o[t[m].parent]+=o[m]}let n=0;for(let m=1;m<t.length;m++){let a=t[t[m].parent];n+=Math.hypot(t[m].x-a.x,t[m].y-a.y)*o[m]}let e=t.filter((m,a)=>a>0&&l[a]===0),c=0;for(let m of r){let a=Math.sin(m),g=Math.cos(m),i=-a,h=[[0,0],[z,0],[0,V],[z,V]].map(([y,b])=>y*g+b*i),p=Math.min(...h),x=Math.max(...h),M=e.map((y)=>y.x*g+y.y*i).sort((y,b)=>y-b),A=0;for(let y=0;y<it;y++){let b=p+(y+0.5)/it*(x-p),d=0,w=M.length;while(d<w){let f=d+w>>1;if(M[f]<b-ct)d=f+1;else w=f}if(d<M.length&&M[d]<=b+ct)A++}c+=A/it/r.length}return{score:c-n/ce,valid:!0,reason:"",light:c,wood:n,leaves:e.length,nodes:t,area:o,suns:r}}function Ie(t,r,s){let l=me(r),o;try{o=t.grow({width:z,height:V,root:[...lt],suns:[...l],random:k(r^2030)})}catch(n){return{score:-1,valid:!1,reason:`grow threw: ${n}`,light:0,wood:0,leaves:0,nodes:[],area:[],suns:l}}return he(o,l)}function Oe(t){let r=t.nodes,s=t.valid?r.slice(1).map((e,c)=>{let m=r[e.parent];return`<line x1="${m.x.toFixed(1)}" y1="${m.y.toFixed(1)}" x2="${e.x.toFixed(1)}" y2="${e.y.toFixed(1)}" stroke-width="${Math.max(0.6,Math.sqrt(t.area[c+1])*0.9).toFixed(2)}"/>`}).join(""):"",l=new Set(r.map((e)=>e.parent)),o=t.valid?r.map((e,c)=>c>0&&!l.has(c)?`<circle cx="${e.x.toFixed(1)}" cy="${e.y.toFixed(1)}" r="${ct}"/>`:"").join(""):"",n=t.suns.map((e)=>`<line x1="${(400-Math.sin(e)*700).toFixed(0)}" y1="${(300-Math.cos(e)*700).toFixed(0)}" x2="400" y2="300"/>`).join("");return`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${z} ${V}" width="${z}" height="${V}"><rect width="100%" height="100%" fill="${G}"/><g stroke="${B}" stroke-opacity="0.25" stroke-dasharray="3 6">${n}</g><g stroke="${C}" stroke-linecap="round">${s}</g><g fill="${C}" fill-opacity="0.35">${o}</g></svg>
+`}var Pt={};T(Pt,{HEIGHT:()=>K,LEAF:()=>ut,MAX_ITERATIONS:()=>fe,MAX_SEGMENTS:()=>Rt,MAX_SYMBOLS:()=>kt,RAYS:()=>mt,ROOT:()=>rt,SHADE:()=>ht,WIDTH:()=>Y,WOOD_SCALE:()=>pe,measure:()=>ye,picture:()=>We,rewrite:()=>ge,run:()=>_e,sunsFor:()=>be,walk:()=>xe});var Y=800,K=600,rt=[400,600],fe=7,kt=400000,Rt=6000,ut=5,mt=600,ht=120,pe=200000;function be(t){let r=k(t^1441);return[-1,0,1].map((s)=>s*0.45+(r()-0.5)*0.3)}function ge(t){let r=String(t.axiom??""),s=Math.max(0,Math.min(fe,Math.floor(+t.iterations||0)));for(let l=0;l<s;l++){let o="";for(let n of r)if(o+=Object.prototype.hasOwnProperty.call(t.rules??{},n)?String(t.rules[n]):n,o.length>kt)throw Error(`the string passes ${kt} symbols`);r=o}return r}function xe(t,r){let s=(+t.angle||0)*Math.PI/180,l=Math.max(0.3,Math.min(1,t.shrink??0.7)),o=Math.max(0.5,Math.min(60,+t.step||0)),n=[{x:rt[0],y:rt[1],parent:-1}],e=0,c=rt[0],m=rt[1],a=0,u=!1,g=[];for(let i of r)if(i==="F"||i==="G"){if(c+=Math.sin(a)*o,m-=Math.cos(a)*o,u)throw Error("drawing after f would float a branch in the air");if(n.push({x:c,y:m,parent:e}),e=n.length-1,n.length>Rt+1)throw Error(`more than ${Rt} segments`)}else if(i==="f")c+=Math.sin(a)*o,m-=Math.cos(a)*o,u=!0;else if(i==="+")a+=s;else if(i==="-")a-=s;else if(i==="!")o*=l;else if(i==="[")g.push([e,c,m,a,o,u]);else if(i==="]"){let h=g.pop();if(!h)throw Error("] without [");[e,c,m,a,o,u]=h}return n}function ye(t,r,s=0){let l=(u)=>({score:-1,valid:!1,reason:u,light:0,wood:0,leaves:0,nodes:t,area:[],suns:r,symbols:s});if(t.length<2)return l("the tree draws nothing");for(let u of t)if(!(u.x>=0&&u.x<=Y&&u.y>=0&&u.y<=K))return l("a branch leaves the frame");let o=Array(t.length).fill(0),n=Array(t.length).fill(0);for(let u=1;u<t.length;u++)o[t[u].parent]++;if(o[0]!==1)return l("the root needs exactly one trunk");for(let u=t.length-1;u>=1;u--){if(o[u]===0)n[u]=1;n[t[u].parent]+=n[u]}let e=0;for(let u=1;u<t.length;u++){let g=t[t[u].parent];e+=Math.hypot(t[u].x-g.x,t[u].y-g.y)*n[u]}let c=t.filter((u,g)=>g>0&&o[g]===0),m=c.filter((u)=>u.y<=rt[1]-ht),a=0;for(let u of r){let g=Math.sin(u),i=Math.cos(u),h=i,p=-g,x=[[0,0],[Y,0],[0,K],[Y,K]].map(([d,w])=>d*h+w*p),M=Math.min(...x),A=Math.max(...x),y=m.map((d)=>d.x*h+d.y*p).sort((d,w)=>d-w),b=0;for(let d=0;d<mt;d++){let w=M+(d+0.5)/mt*(A-M),f=0,F=y.length;while(f<F){let S=f+F>>1;if(y[S]<w-ut)f=S+1;else F=S}if(f<y.length&&y[f]<=w+ut)b++}a+=b/mt/r.length}return{score:a-e/pe,valid:!0,reason:"",light:a,wood:e,leaves:c.length,nodes:t,area:n,suns:r,symbols:s}}function _e(t,r,s){let l=be(r);try{let o=t.grammar({width:Y,height:K,suns:[...l]}),n=ge(o);return ye(xe(o,n),l,n.length)}catch(o){return{score:-1,valid:!1,reason:String(o instanceof Error?o.message:o),light:0,wood:0,leaves:0,nodes:[],area:[],suns:l,symbols:0}}}function We(t){let r=t.nodes,s=t.valid?r.slice(1).map((n,e)=>{let c=r[n.parent];return`<line x1="${c.x.toFixed(1)}" y1="${c.y.toFixed(1)}" x2="${n.x.toFixed(1)}" y2="${n.y.toFixed(1)}" stroke-width="${Math.max(0.5,Math.sqrt(t.area[e+1])*0.6).toFixed(2)}"/>`}).join(""):"",l=new Set(r.map((n)=>n.parent)),o=t.valid?r.map((n,e)=>e>0&&!l.has(e)?`<circle cx="${n.x.toFixed(1)}" cy="${n.y.toFixed(1)}" r="${ut}"/>`:"").join(""):"";return`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${Y} ${K}" width="${Y}" height="${K}"><rect width="100%" height="100%" fill="${G}"/><rect x="0" y="${K-ht}" width="${Y}" height="${ht}" fill="${B}" fill-opacity="0.06"/><g stroke="${C}" stroke-linecap="round">${s}</g><g fill="${C}" fill-opacity="0.3">${o}</g></svg>
+`}var Tt={};T(Tt,{nextSeed:()=>je});function je(t){if(t.missesInARow>=400)return null;return[t.random()*t.width,t.random()*t.height]}var vt={};T(vt,{nextSeed:()=>De});var de=new WeakMap;function De(t){let r=de.get(t);if(!r)de.set(t,r={queue:[],head:0,done:0});let s=t.spacing*1.001,l=(o,n)=>o>=0&&n>=0&&o<t.width&&n<t.height&&t.nearest(o,n)>=t.spacing;for(;;){while(r.head<r.queue.length){let[n,e]=r.queue[r.head++];if(l(n,e))return[n,e]}if(r.done>=t.trails.length)break;r.queue=[],r.head=0;let o=t.trails[r.done++];for(let n=0;n<o.length;n+=2){let e=o[n],c=o[Math.min(n+1,o.length-1)],m=o[Math.max(n-1,0)],a=Math.atan2(c[1]-m[1],c[0]-m[0])+Math.PI/2;r.queue.push([e[0]+s*Math.cos(a),e[1]+s*Math.sin(a)],[e[0]-s*Math.cos(a),e[1]-s*Math.sin(a)])}}if(t.missesInARow>=400)return null;return[t.random()*t.width,t.random()*t.height]}var It={};T(It,{params:()=>Le,turn:()=>Ce});var Le={sensorAngle:Math.PI/4,sensorDistance:9,stepSize:1,deposit:1},Ce=({left:t,center:r,right:s},l)=>{let o=Math.PI/4;if(r>=t&&r>=s)return 0;if(r<t&&r<s)return l()<0.5?-o:o;return t>s?-o:o};var Ot={};T(Ot,{params:()=>Be,turn:()=>Xe});var Be={sensorAngle:0.5,sensorDistance:12,stepSize:2,deposit:4};var Xe=({left:t,center:r,right:s},l)=>{if(r>=t&&r>=s)return(l()-0.5)*1;if(r<t&&r<s)return l()<0.5?-0.1:0.1;return t>s?-0.1:0.1};var _t={};T(_t,{forces:()=>Ge});var Ge=(t,r)=>{let s=r.n,l=r.memory.v??=new Float64Array(2*s),o=new Float64Array(2*s);for(let n=0;n<s;n++)for(let e=0;e<s;e++){if(n===e)continue;let c=t[2*n]-t[2*e],m=t[2*n+1]-t[2*e+1],a=Math.hypot(c,m)||0.01;if(a<100){let u=(100-a)/100*2;o[2*n]+=c/a*u,o[2*n+1]+=m/a*u}}for(let[n,e]of r.edges){let c=t[2*e]-t[2*n],m=t[2*e+1]-t[2*n+1],a=Math.hypot(c,m)||0.01,u=(a-60)*0.05;o[2*n]+=c/a*u,o[2*n+1]+=m/a*u,o[2*e]-=c/a*u,o[2*e+1]-=m/a*u}for(let n=0;n<2*s;n++)l[n]=(l[n]+o[n])*0.5;return l};var Wt={};T(Wt,{forces:()=>qe});var ft=(t,r,s,l,o,n)=>(s-t)*(n-r)-(l-r)*(o-t),He=(t,r,s,l,o)=>{if(r===l||r===o||s===l||s===o)return 0;let n=ft(t[2*r],t[2*r+1],t[2*s],t[2*s+1],t[2*l],t[2*l+1]),e=ft(t[2*r],t[2*r+1],t[2*s],t[2*s+1],t[2*o],t[2*o+1]),c=ft(t[2*l],t[2*l+1],t[2*o],t[2*o+1],t[2*r],t[2*r+1]),m=ft(t[2*l],t[2*l+1],t[2*o],t[2*o+1],t[2*s],t[2*s+1]);return n*e<0&&c*m<0?1:0};function Ue(t,r,s,l,o){let e=new Float64Array(2*t);for(let g=0;g<t;g++)e[2*g]=20+o()*(s-40),e[2*g+1]=20+o()*(l-40);let c=70;for(let g=0;g<500;g++){let i=new Float64Array(2*t),h=1-g/500;for(let p=0;p<t;p++)for(let x=p+1;x<t;x++){let M=e[2*p]-e[2*x],A=e[2*p+1]-e[2*x+1],y=M*M+A*A+0.01,b=3000/y;i[2*p]+=M*b,i[2*p+1]+=A*b,i[2*x]-=M*b,i[2*x+1]-=A*b}for(let[p,x]of r){let M=e[2*x]-e[2*p],A=e[2*x+1]-e[2*p+1],y=Math.hypot(M,A)||0.01,b=(y-c)*0.15/y;i[2*p]+=M*b,i[2*p+1]+=A*b,i[2*x]-=M*b,i[2*x+1]-=A*b}for(let p=0;p<t;p++){let x=i[2*p],M=i[2*p+1],A=Math.hypot(x,M)||1,y=Math.min(A,10*h+0.5);e[2*p]=Math.min(s-20,Math.max(20,e[2*p]+x/A*y)),e[2*p+1]=Math.min(l-20,Math.max(20,e[2*p+1]+M/A*y))}}let m=Array.from({length:t},()=>[]);r.forEach(([g,i],h)=>{m[g].push(h),m[i].push(h)});let a=(g)=>{let i=0;for(let x of m[g]){let[M,A]=r[x];for(let y=0;y<r.length;y++)if(y!==x)i+=He(e,M,A,r[y][0],r[y][1])}let h=0;for(let x=0;x<t;x++)if(x!==g&&Math.hypot(e[2*g]-e[2*x],e[2*g+1]-e[2*x+1])<40)h++;let p=0;for(let x of m[g]){let[M,A]=r[x];p+=Math.abs(Math.hypot(e[2*M]-e[2*A],e[2*M+1]-e[2*A+1])-c)}return i*1000+h*30+p*0.1},u=30000;for(let g=0;g<u;g++){let i=g/u,h=Math.floor(o()*t),p=e[2*h],x=e[2*h+1],M=a(h),A=80*(1-i)+3,y=800*(1-i)**2;if(o()<0.5&&m[h].length){let b=0,d=0;for(let w of m[h]){let f=r[w][0]===h?r[w][1]:r[w][0];b+=e[2*f],d+=e[2*f+1]}e[2*h]=b/m[h].length+(o()-0.5)*A*2,e[2*h+1]=d/m[h].length+(o()-0.5)*A*2}else e[2*h]=p+(o()-0.5)*A*2,e[2*h+1]=x+(o()-0.5)*A*2;if(e[2*h]=Math.min(s-20,Math.max(20,e[2*h])),e[2*h+1]=Math.min(l-20,Math.max(20,e[2*h+1])),a(h)-M>-y*Math.log(1-o()))e[2*h]=p,e[2*h+1]=x}return e}var Me=8,qe=(t,r)=>{let{n:s,memory:l}=r,o=l.t??=Ue(s,r.edges,r.width,r.height,r.random),n=new Float64Array(2*s);for(let e=0;e<s;e++){let c=o[2*e]-t[2*e],m=o[2*e+1]-t[2*e+1],a=Math.hypot(c,m),u=a>Me?Me/a:1;n[2*e]=c*u,n[2*e+1]=m*u}return n};var jt={};T(jt,{steer:()=>Ye});var Ye=()=>0;var Dt={};T(Dt,{steer:()=>Ke});var Ke=(t,r,s,l)=>{let o=0,n=1/0;for(let e=0;e<17;e++){let m=-1.4+2.8*(8+(e&1?e+1>>1:-(e>>1)))/16,a=t.heading,u=0,g=0,i=2*Math.abs(m)+1*Math.abs(m-t.heading),h=!1;for(let p=1;p<=30;p++){let x=m-a;x=Math.atan2(Math.sin(x),Math.cos(x)),a+=Math.max(-0.15,Math.min(0.15,x)),u+=2*Math.cos(a),g+=2*Math.sin(a),i-=0.1*Math.cos(a);let M=1-p/38;for(let y of s){let b=Math.hypot(y.dx-u,y.dy-g)-y.r-3;if(b<0)i+=100*M*(1-b/3)}let A=t.y+g;if(A<6||A>l.height-6)i+=3;if(p<=4)for(let y of r){let b=Math.hypot(y.dx+2*p*Math.cos(y.heading)-u,y.dy+2*p*Math.sin(y.heading)-g);if(b<6)i+=500*(6-b)/6*M}if(i-0.1*(30-p)>=n){h=!0;break}}if(!h&&i<n)n=i,o=m}return o};var Lt={};T(Lt,{grow:()=>ze});var ze=(t)=>{let r=[{x:t.root[0],y:t.root[1],parent:-1}],s=(l,o,n,e)=>{let c=r[l];r.push({x:c.x+Math.sin(o)*n,y:c.y-Math.cos(o)*n,parent:l});let m=r.length-1;if(e===0)return;s(m,o-0.8,n*0.6,e-1),s(m,o+0.8,n*0.6,e-1)};return s(0,0,150,6),r};var Ct={};T(Ct,{grow:()=>Ve});var Ve=(t)=>{let[r,s]=t.root,l=t.suns.map((i)=>{let h=Math.sin(i),p=Math.cos(i),x=p,M=-h,A=[[0,0],[t.width,0],[0,t.height],[t.width,t.height]].map(([d,w])=>d*x+w*M),y=Math.min(...A),b=Math.max(...A);return{px:x,py:M,lo:y,step:(b-y)/600,hit:new Uint8Array(600)}}),o=(i,h,p)=>{let x=0;for(let M of l){let A=i*M.px+h*M.py,y=Math.max(0,Math.ceil((A-5-M.lo)/M.step-0.5)),b=Math.min(599,Math.floor((A+5-M.lo)/M.step-0.5));for(let d=y;d<=b;d++)if(!M.hit[d]){if(x++,p)M.hit[d]=1}}return x/(600*l.length)},n=[],e=[],c=[],m=[],a=[];for(let i=2;i<=t.width-2;i+=6)for(let h=2;h<=t.height-2;h+=6){let p=Math.hypot(i-r,h-s);if(p<1)continue;let x=o(i,h,!1)-p/200000;if(x<=0)continue;n.push(i),e.push(h),c.push(p/200000),m.push(x),a.push(m.length-1)}let u=(i)=>{for(;;){let h=i;for(let p of[2*i+1,2*i+2])if(p<a.length&&m[a[p]]>m[a[h]])h=p;if(h===i)return;[a[i],a[h]]=[a[h],a[i]],i=h}};for(let i=(a.length>>1)-1;i>=0;i--)u(i);let g=[{x:r,y:s,parent:-1}];while(g.length<3000&&a.length>0){let i=a[0],h=o(n[i],e[i],!1)-c[i],p=Math.max(a.length>1?m[a[1]]:-1,a.length>2?m[a[2]]:-1);if(h>=p&&h>0)o(n[i],e[i],!0),g.push({x:n[i],y:e[i],parent:0}),m[i]=-1;else m[i]=h;if(m[i]<=0)a[0]=a[a.length-1],a.pop();u(0)}return g};var Bt={};T(Bt,{grammar:()=>Je});var Je=()=>({axiom:"X",rules:{X:"F+[[X]-X]-F[-FX]+X",F:"FF"},iterations:5,angle:25,step:4.5});var Xt={};T(Xt,{grammar:()=>Qe});var Qe=()=>({axiom:"FX",rules:{X:"!F[+X][-X]F[X]"},iterations:5,angle:40.15,step:54.4,shrink:0.99});globalThis.Garden={flow:{world:bt,before:Tt,after:vt},slime:{world:gt,before:It,after:Ot},web:{world:dt,before:_t,after:Wt},flock:{world:Et,before:jt,after:Dt},canopy:{world:Nt,before:Lt,after:Ct},ltree:{world:Pt,before:Bt,after:Xt}};})();
+</script>
+<script>
+const SCORES = {"ltree": {"title": "L-tree", "from": "Lindenmayer \u00b7 1968", "note": "<b>What it found:</b> <code>X \u2192 !F[+X][-X]F[X]</code> at 40\u00b0, five iterations, with a long step that barely shrinks. Fewer, longer limbs reach the light above the understory with half the fractal plant's wood: light 0.47 for wood 35,700, against 0.28 for 64,000.", "before": -0.035236, "after": 0.296468, "keptLabel": "Kept by Thompson"}, "flow": {"title": "Flow", "from": "M_1_5 \u00b7 noise agents", "note": "<b>What it found:</b> start each new trail one spacing beside an old one, walking the trails in order, and fall back to random starts when no room is left. That is Jobard and Lefer's 1997 method, which the model named itself. The repository's own Thompson page hints at the idea, so this shows the loop applying a known method, not discovering one.", "before": 0.828244, "after": 0.881018, "keptLabel": "Kept by Thompson"}, "slime": {"title": "Slime", "from": "Physarum \u00b7 Jones 2010", "note": "<b>It joined every food by flooding.</b> The kept rule wanders wide and deposits heavily, so the trail covers about 17,000 of the 24,000 cells and every food sits in one piece. My score pays 0.1 just for joining, so a blob beats a lean network that misses one food. A lean tree would score near 1.1; this is 0.114. The next card on this problem should start from here and be judged on leanness, which is the hard part.", "before": 0.022222, "after": 0.113994, "keptLabel": "Kept by Thompson"}, "web": {"title": "Web", "from": "M_6_1 \u00b7 springs", "note": "<b>What it found:</b> it plans first and walks after. On step 0 it lays the graph out privately (springs with cooling, then a search that removes crossings), then moves every node toward its planned spot at the speed limit. Zero crossings on two of the three fixed graphs and two on this one. It is a legitimate use of the memory the world offers, though it is less of a living spring system than M_6_1.", "before": 0.136757, "after": 0.827736, "keptLabel": "Kept by Thompson"}, "flock": {"title": "Flock", "from": "boids \u00b7 P_2_2", "note": "<b>What it found:</b> not flocking. Each agent tries seventeen headings, flies each one thirty steps ahead in its head under the judge's own speed and turn limits, charges for obstacles and near neighbours, and takes the cheapest. It is a small planner, not boids: all 200 get through on this field, 591 of 600 over the three fixed fields.", "before": 0.018333, "after": 0.898333, "keptLabel": "Kept by Thompson"}, "canopy": {"title": "Canopy", "from": "M_5_1 \u00b7 recursion", "note": "<b>The judge passed it; the eye should not.</b> The kept tree is a fan of single stalks from the root. With one branch per leaf, the pipe model adds no trunk cost, and leaves near the ground still catch the low suns, so grass scores better than a tree. This is a hole in my measure, not a win for the agent. The fix belongs in the fence (one trunk from the root, light blocked by the ground) and is yours to approve before a rerun.", "before": 0.224656, "after": 0.768628, "keptLabel": "Kept by Thompson"}};
+(() => {
+  const G = window.Garden, reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  let C = {};
+  const readColors = () => { C = { ink: css('--ink'), paper: css('--paper'), sage: css('--sage'), sand: css('--sand'), rust: css('--rust'), mist: css('--mist'), muted: css('--muted'), rule: css('--rule') }; };
+  readColors();
+  const hex = h => { const v = parseInt(h.slice(1), 16); return [v >> 16 & 255, v >> 8 & 255, v & 255]; };
+
+  // ---- one simulation per problem: returns { frames, draw(ctx, w, h, f, fresh), label(f) } ----
+  const SIMS = {
+    flow: { aspect: 600 / 1000, about: 'Agents ride a noise field (M_1_5) and leave trails. Where each new agent starts decides how evenly the page fills.',
+      build(agent) {
+        const W = G.flow.world, r = W.run(agent, 1, 10000), n = r.trails.length, per = Math.max(1, Math.ceil(n / 140));
+        return { frames: Math.ceil(n / per) + 1, label: f => `${Math.min(n, f * per)} trails`, final: `coverage ${r.coverage.toFixed(3)}`,
+          draw(ctx, w, h, f, fresh, from) {
+            const s = w / W.WIDTH;
+            if (fresh) { ctx.fillStyle = C.paper; ctx.fillRect(0, 0, w, h); from = 0; }
+            ctx.strokeStyle = C.sage; ctx.lineWidth = 1.1; ctx.lineCap = 'round';
+            for (let i = from * per; i < Math.min(n, f * per); i++) { const t = r.trails[i]; ctx.beginPath(); t.forEach(([x, y], k) => k ? ctx.lineTo(x * s, y * s) : ctx.moveTo(x * s, y * s)); ctx.stroke(); }
+          } };
+      } },
+    slime: { aspect: 120 / 200, about: 'Three thousand Physarum agents sense, turn and leave trail. The network they draw has to join all six food sources (sand) as leanly as it can.',
+      build(agent) {
+        const W = G.slime.world, snaps = [], every = 4;
+        const r = W.run(agent, 1, 20000, (step, trail) => { if (step % every === 0) snaps.push(Float32Array.from(trail)); });
+        const off = document.createElement('canvas'); off.width = W.W; off.height = W.H; const octx = off.getContext('2d'), img = octx.createImageData(W.W, W.H);
+        return { frames: snaps.length, label: f => `step ${Math.min(f, snaps.length - 1) * every}`, final: r.connected ? `all foods joined · ${r.cells} cells` : `${Math.round(r.pairs * 15)} of 15 pairs joined`,
+          draw(ctx, w, h, f) {
+            const t = snaps[Math.min(f, snaps.length - 1)], [pr, pg, pb] = hex(C.paper), [ir, ig, ib] = hex(C.sage);
+            for (let i = 0; i < t.length; i++) { const v = Math.min(1, t[i] / 3), o = i * 4; img.data[o] = pr + (ir - pr) * v; img.data[o + 1] = pg + (ig - pg) * v; img.data[o + 2] = pb + (ib - pb) * v; img.data[o + 3] = 255; }
+            octx.putImageData(img, 0, 0); ctx.imageSmoothingEnabled = true; ctx.drawImage(off, 0, 0, w, h);
+            ctx.fillStyle = C.sand; const s = w / W.W;
+            for (const [x, y] of r.foods) { ctx.beginPath(); ctx.arc((x + .5) * s, (y + .5) * s, Math.max(3, s * 1.6), 0, 7); ctx.fill(); }
+          } };
+      } },
+    web: { aspect: 600 / 800, about: 'Nodes repel and edges pull (M_6_1). The graph is a shuffled grid, so a layout with no crossings exists. Crossing edges are drawn in rust.',
+      build(agent) {
+        const W = G.web.world, snaps = [];
+        const r = W.run(agent, 1, 20000, (step, p) => { if (step % 2 === 0) snaps.push(Float64Array.from(p)); });
+        const E = r.edges;
+        const cross = (P, a, b) => { const [p, q] = E[a], [s, t] = E[b]; if (p === s || p === t || q === s || q === t) return false;
+          const o = (ax, ay, bx, by, cx, cy) => (bx - ax) * (cy - ay) - (by - ay) * (cx - ax);
+          const d1 = o(P[2*s], P[2*s+1], P[2*t], P[2*t+1], P[2*p], P[2*p+1]), d2 = o(P[2*s], P[2*s+1], P[2*t], P[2*t+1], P[2*q], P[2*q+1]);
+          const d3 = o(P[2*p], P[2*p+1], P[2*q], P[2*q+1], P[2*s], P[2*s+1]), d4 = o(P[2*p], P[2*p+1], P[2*q], P[2*q+1], P[2*t], P[2*t+1]);
+          return d1 * d2 < 0 && d3 * d4 < 0; };
+        let lastCount = 0;
+        return { frames: snaps.length, label: () => `${lastCount} crossings`, final: `${r.crossings} crossings`,
+          draw(ctx, w, h, f) {
+            const P = snaps[Math.min(f, snaps.length - 1)], s = w / W.WIDTH, bad = new Set();
+            for (let a = 0; a < E.length; a++) for (let b = a + 1; b < E.length; b++) if (cross(P, a, b)) { bad.add(a); bad.add(b); }
+            lastCount = 0; for (let a = 0; a < E.length; a++) for (let b = a + 1; b < E.length; b++) if (cross(P, a, b)) lastCount++;
+            ctx.fillStyle = C.paper; ctx.fillRect(0, 0, w, h); ctx.lineWidth = 1.3;
+            E.forEach(([a, b], i) => { ctx.strokeStyle = bad.has(i) ? C.rust : C.sage; ctx.beginPath(); ctx.moveTo(P[2*a] * s, P[2*a+1] * s); ctx.lineTo(P[2*b] * s, P[2*b+1] * s); ctx.stroke(); });
+            ctx.fillStyle = C.ink; for (let i = 0; i < P.length / 2; i++) { ctx.beginPath(); ctx.arc(P[2*i] * s, P[2*i+1] * s, 2.6, 0, 7); ctx.fill(); }
+          } };
+      } },
+    flock: { aspect: 600 / 1000, about: 'Two hundred agents fly from left to right through fourteen obstacles. The judge owns speed and turning; the agent only chooses a heading.',
+      build(agent) {
+        const W = G.flock.world, xs = [], ys = [], ss = [];
+        const r = W.run(agent, 1, 20000, (step, x, y, hd, st) => { if (step % 3 === 0) { xs.push(Float32Array.from(x)); ys.push(Float32Array.from(y)); ss.push(Uint8Array.from(st)); } });
+        const obs = r.obstacles;
+        return { frames: xs.length, label: f => { const st = ss[Math.min(f, ss.length - 1)]; let a = 0, d = 0; for (const v of st) { if (v === 1) a++; if (v === 2) d++; } return `${a} through · ${d} lost`; }, final: `${r.arrived} of 200 through`,
+          draw(ctx, w, h, f, fresh) {
+            const s = w / W.WIDTH, k = Math.min(f, xs.length - 1);
+            if (fresh) { ctx.fillStyle = C.paper; ctx.fillRect(0, 0, w, h); }
+            ctx.globalAlpha = 0.08; ctx.fillStyle = C.paper; ctx.fillRect(0, 0, w, h); ctx.globalAlpha = 1;
+            ctx.fillStyle = C.sand; for (const o of obs) { ctx.beginPath(); ctx.arc(o.x * s, o.y * s, o.r * s, 0, 7); ctx.fill(); }
+            ctx.strokeStyle = C.rule; ctx.setLineDash([3, 4]); ctx.beginPath(); ctx.moveTo(W.GOAL_X * s, 0); ctx.lineTo(W.GOAL_X * s, h); ctx.stroke(); ctx.setLineDash([]);
+            const X = xs[k], Y = ys[k], S = ss[k];
+            for (let i = 0; i < X.length; i++) { if (S[i] === 1) continue; ctx.fillStyle = S[i] === 2 ? C.rust : C.ink; ctx.fillRect(X[i] * s - 1, Y[i] * s - 1, 2.2, 2.2); }
+          } };
+      } },
+    canopy: { aspect: 600 / 800, about: 'A tree grows from the root toward three suns (dotted) and is scored on light caught minus wood spent, after M_5_1\'s recursion.',
+      build(agent) {
+        const W = G.canopy.world, r = W.run(agent, 1, 10000), N = r.nodes, n = N.length;
+        const kids = new Set(N.map(q => q.parent)), depth = N.map(() => 0);
+        for (let i = 1; i < n; i++) depth[i] = depth[N[i].parent] + 1;
+        const order = N.map((_, i) => i).slice(1).sort((a, b) => depth[a] - depth[b] || a - b);
+        const per = Math.max(1, Math.ceil(order.length / 120)), grow = Math.ceil(order.length / per);
+        return { frames: grow + 30, label: f => f < grow ? `${Math.min(order.length, f * per)} branches` : `${r.leaves} leaves`, final: `light ${r.light.toFixed(2)} · wood ${Math.round(r.wood).toLocaleString()}`,
+          draw(ctx, w, h, f) {
+            const s = w / W.WIDTH; ctx.fillStyle = C.paper; ctx.fillRect(0, 0, w, h);
+            ctx.strokeStyle = C.mist; ctx.setLineDash([2, 6]); ctx.lineWidth = 1;
+            for (const th of r.suns) { ctx.beginPath(); ctx.moveTo((400 - Math.sin(th) * 700) * s, (300 - Math.cos(th) * 700) * s); ctx.lineTo(400 * s, 300 * s); ctx.stroke(); }
+            ctx.setLineDash([]); ctx.strokeStyle = C.ink; ctx.lineCap = 'round';
+            const upto = Math.min(order.length, f * per);
+            for (let k = 0; k < upto; k++) { const i = order[k], p = N[N[i].parent]; ctx.lineWidth = Math.max(0.7, Math.sqrt(r.area[i]) * 0.9 * s * 1.25); ctx.beginPath(); ctx.moveTo(p.x * s, p.y * s); ctx.lineTo(N[i].x * s, N[i].y * s); ctx.stroke(); }
+            if (f >= grow) { ctx.globalAlpha = Math.min(1, (f - grow) / 15) * 0.55; ctx.fillStyle = C.sage; for (let i = 1; i < n; i++) if (!kids.has(i)) { ctx.beginPath(); ctx.arc(N[i].x * s, N[i].y * s, W.LEAF * s * 1.2, 0, 7); ctx.fill(); } ctx.globalAlpha = 1; }
+          } };
+      } },
+    ltree: { aspect: 600 / 800, about: 'A Lindenmayer grammar, rewritten and drawn by the judge\'s turtle in the order it walks. One trunk pays for every leaf, and the shaded band at the foot is understory where leaves catch no light.',
+      build(agent) {
+        const W = G.ltree.world, r = W.run(agent, 1, 10000), N = r.nodes, n = N.length;
+        if (!r.valid) return { frames: 1, label: () => r.reason, final: 'invalid: ' + r.reason, draw(ctx, w, h) { ctx.fillStyle = C.paper; ctx.fillRect(0, 0, w, h); } };
+        const kids = new Set(N.map(q => q.parent)), per = Math.max(1, Math.ceil((n - 1) / 160)), grow = Math.ceil((n - 1) / per);
+        return { frames: grow + 30, label: f => f < grow ? `${Math.min(n - 1, f * per)} of ${n - 1} segments` : `${r.leaves} leaves`, final: `light ${r.light.toFixed(2)} · wood ${Math.round(r.wood).toLocaleString()}`,
+          draw(ctx, w, h, f, fresh, from) {
+            const s = w / W.WIDTH;
+            if (fresh || f >= grow) { ctx.fillStyle = C.paper; ctx.fillRect(0, 0, w, h); ctx.globalAlpha = 0.12; ctx.fillStyle = C.sand; ctx.fillRect(0, (W.HEIGHT - W.SHADE) * s, w, W.SHADE * s); ctx.globalAlpha = 1; from = 0; }
+            const upto = Math.min(n - 1, f * per), start = f >= grow ? 0 : from * per;
+            ctx.strokeStyle = C.ink; ctx.lineCap = 'round';
+            for (let i = start + 1; i <= (f >= grow ? n - 1 : upto); i++) { const p = N[N[i].parent]; ctx.lineWidth = Math.max(0.5, Math.sqrt(r.area[i]) * 0.6 * s * 1.25); ctx.beginPath(); ctx.moveTo(p.x * s, p.y * s); ctx.lineTo(N[i].x * s, N[i].y * s); ctx.stroke(); }
+            if (f >= grow) { ctx.globalAlpha = Math.min(1, (f - grow) / 15) * 0.5; ctx.fillStyle = C.sage; for (let i = 1; i < n; i++) if (!kids.has(i)) { ctx.beginPath(); ctx.arc(N[i].x * s, N[i].y * s, W.LEAF * s * 1.2, 0, 7); ctx.fill(); } ctx.globalAlpha = 1; }
+          } };
+      } },
+  };
+
+  // ---- page ----
+  const host = document.getElementById('plots'), panels = [];
+  for (const name of ['ltree', 'flow', 'slime', 'web', 'flock', 'canopy']) {
+    const sc = SCORES[name], sim = SIMS[name];
+    const sec = document.createElement('section'); sec.className = 'plot'; sec.id = name;
+    const up = sc.after > sc.before;
+    sec.innerHTML = `<div class="plot-head"><h2>${sc.title}<span>${sc.from}</span></h2>
+      <div class="scores"><div>planted<b>${sc.before.toFixed(3)}</b></div><div class="${up ? 'up' : ''}">kept<b>${sc.after.toFixed(3)}</b></div></div>
+      <p class="about">${sim.about}</p></div>
+      <div class="pair">${['before', 'after'].map(k => `<figure><canvas data-k="${k}" aria-label="${sc.title}, ${k === 'before' ? 'planted agent' : 'kept agent'}, animated"></canvas><figcaption><span class="who">${k === 'before' ? 'Planted' : sc.keptLabel}</span><span class="live">waiting to grow</span></figcaption></figure>`).join('')}</div>
+      ${sc.note ? `<p class="note">${sc.note}</p>` : ''}
+      <div class="controls"><button type="button" class="replay">Grow again</button></div>`;
+    host.appendChild(sec);
+    const figs = [...sec.querySelectorAll('canvas')].map(cv => ({ cv, k: cv.dataset.k, live: cv.parentElement.querySelector('.live'), sim: null, f: 0, last: 0, hold: 0 }));
+    const panel = { name, sec, figs, built: false };
+    sec.querySelector('.replay').onclick = () => { for (const p of figs) { p.f = 0; p.last = 0; p.hold = 0; p.fresh = true; } };
+    panels.push(panel);
+  }
+
+  function size(p) {
+    const dpr = Math.min(devicePixelRatio || 1, 2), w = p.cv.clientWidth, h = Math.round(w * SIMS[p.panel].aspect);
+    p.cv.style.height = h + 'px'; p.cv.width = Math.round(w * dpr); p.cv.height = Math.round(h * dpr);
+    const ctx = p.cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); p.ctx = ctx; p.w = w; p.h = h; p.fresh = true; p.last = 0;
+  }
+  for (const pn of panels) for (const p of pn.figs) { p.panel = pn.name; size(p); p.ctx.fillStyle = C.paper; p.ctx.fillRect(0, 0, p.w, p.h); }
+
+  const queue = [];
+  function build(pn) {
+    if (pn.built) return; pn.built = true;
+    for (const p of pn.figs) p.live.textContent = 'growing…';
+    queue.push(pn); if (queue.length === 1) setTimeout(work, 30);
+  }
+  function work() {
+    const pn = queue[0]; if (!pn) return;
+    for (const p of pn.figs) {
+      try { p.sim = SIMS[pn.name].build(G[pn.name][p.k]); }
+      catch (e) { p.live.textContent = 'could not run: ' + e; }
+      p.f = 0; p.fresh = true;
+      if (reduce && p.sim) { p.f = p.sim.frames - 1; p.sim.draw(p.ctx, p.w, p.h, p.f, true, 0); p.live.textContent = p.sim.final; }
+    }
+    queue.shift(); if (queue.length) setTimeout(work, 30);
+  }
+
+  const visible = new Set();
+  const io = new IntersectionObserver(es => es.forEach(e => { const pn = panels.find(q => q.sec === e.target); if (e.isIntersecting) { visible.add(pn); build(pn); } else visible.delete(pn); }), { rootMargin: '200px 0px' });
+  panels.forEach(pn => io.observe(pn.sec));
+
+  let tick = 0;
+  function loop() {
+    tick++;
+    if (!reduce && tick % 2 === 0) for (const pn of visible) for (const p of pn.figs) {
+      if (!p.sim) continue;
+      if (p.f >= p.sim.frames - 1) { p.live.textContent = p.sim.final; if (++p.hold > 150) { p.f = 0; p.hold = 0; p.fresh = true; } continue; }
+      p.f++;
+      p.sim.draw(p.ctx, p.w, p.h, p.f, p.fresh, p.last); p.fresh = false; p.last = p.f;
+      p.live.textContent = p.sim.label(p.f);
+    }
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+  let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { for (const pn of panels) for (const p of pn.figs) { size(p); if (p.sim) { p.sim.draw(p.ctx, p.w, p.h, p.f, true, 0); p.fresh = false; p.last = p.f; } } }, 200); });
+  const recolor = () => { readColors(); for (const pn of panels) for (const p of pn.figs) if (p.sim) { p.sim.draw(p.ctx, p.w, p.h, p.f, true, 0); p.fresh = false; p.last = p.f; } };
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', recolor);
+  new MutationObserver(recolor).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+})();
+</script>
+
+</body>
+</html>

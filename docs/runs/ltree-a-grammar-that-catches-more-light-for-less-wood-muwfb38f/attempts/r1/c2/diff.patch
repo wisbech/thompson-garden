@@ -1,0 +1,26 @@
+diff --git a/problems/ltree/agent.ts b/problems/ltree/agent.ts
+index ee7f939..22c1407 100644
+--- a/problems/ltree/agent.ts
++++ b/problems/ltree/agent.ts
+@@ -2,12 +2,14 @@
+ // Self-contained: type imports only.
+ import type { LTreeAgent } from "../../judge/ltree/world";
+ 
+-// Baseline: Prusinkiewicz and Lindenmayer's "fractal plant" (The Algorithmic Beauty of Plants, figure 1.24f),
+-// set upright on the root.
++// A short trunk, then a binary tree: every fork's two branches are one "!" shorter than their parent (shrink 0.9),
++// so seven generations stay inside the frame. Swept on seeds 1-3: angle 30 and shrink 0.9 score about 0.245 on every
++// seed against the baseline's -0.03; a wider angle spreads leaves further but costs wood, a narrower one overlaps crowns.
+ export const grammar: LTreeAgent["grammar"] = () => ({
+-  axiom: "X",
+-  rules: { X: "F+[[X]-X]-F[-FX]+X", F: "FF" },
+-  iterations: 5,
+-  angle: 25,
+-  step: 4.5,
++  axiom: "FA",
++  rules: { A: "!F[+A][-A]" },
++  iterations: 7,
++  angle: 30,
++  step: 60,
++  shrink: 0.9,
+ });

@@ -1,0 +1,55 @@
+diff --git a/problems/flock/agent.ts b/problems/flock/agent.ts
+index bea04d8..8e595e7 100644
+--- a/problems/flock/agent.ts
++++ b/problems/flock/agent.ts
+@@ -2,5 +2,48 @@
+ // Self-contained: type imports only.
+ import type { FlockAgent } from "../../judge/flock/world";
+ 
+-// Baseline, the "stupid agent" of P_2_2_1 given a goal: head straight for the right edge.
+-export const steer: FlockAgent["steer"] = () => 0;
++const SEPARATION = 14;   // neighbours closer than this push apart
++const SEP_GAIN = 0.15;   // push per unit of overlap
++const EDGE = 15;         // distance from top/bottom edge where the wall nudge starts
++const EDGE_GAIN = 1.5;
++
++// Head for the right edge; slide around every obstacle ahead on its freer lane (a tangent to its edge),
++// push off when close, and keep a little distance from neighbours.
++export const steer: FlockAgent["steer"] = (me, neighbours, obstacles, world) => {
++  let vx = 1, vy = 0;
++  const ahead = obstacles.filter(o => o.dx >= -o.r - 6);    // drop obstacles already passed (with body clearance)
++  for (const o of ahead) {
++    const dist = Math.max(Math.hypot(o.dx, o.dy), 1e-6), gap = dist - o.r;
++    const ux = o.dx / dist, uy = o.dy / dist;
++    // Lane clearance: room to the walls, and to any obstacle that overlaps this one along the way.
++    const oy = me.y + o.dy;                                 // obstacle's world y: the same for every agent and step
++    const room = (s: number) => {
++      const ly = oy + s * (o.r + 20);
++      let c = Math.min(ly - 10, world.height - 10 - ly);
++      for (const p of ahead) {
++        if (p === o || Math.abs(p.dx - o.dx) > p.r + o.r + 30) continue;
++        c = Math.min(c, Math.abs(me.y + p.dy - ly) - p.r - 10);
++      }
++      return c;
++    };
++    const up = room(-1), down = room(1);                    // -1: pass above, +1: pass below
++    // Deterministic tie-break from the obstacle's own world position, so the choice never flips mid-approach.
++    const side = Math.abs(up - down) > 8 ? (down > up ? 1 : -1) : (oy < world.height / 2 ? 1 : -1);
++    // tangent that turns away from the centre on that side
++    const tx = side > 0 ? -uy : uy, ty = side > 0 ? ux : -ux;
++    const w = Math.max(0, Math.min(1, (65 - gap) / 55));
++    const k = w * w * 4;
++    vx += k * tx; vy += k * ty;
++    if (gap < 10) { const p = (1 - gap / 10) * 4; vx -= ux * p; vy -= uy * p; }
++  }
++  for (const n of neighbours) {
++    const d = Math.hypot(n.dx, n.dy);
++    if (d < SEPARATION && d > 0) {
++      const f = (SEPARATION - d) * SEP_GAIN / d;
++      vx -= n.dx * f; vy -= n.dy * f;
++    }
++  }
++  if (me.y < EDGE) vy += EDGE_GAIN;
++  if (me.y > world.height - EDGE) vy -= EDGE_GAIN;
++  return Math.atan2(vy, vx);
++};

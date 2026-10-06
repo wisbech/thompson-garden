@@ -1,0 +1,12 @@
+{
+  "branch": "refine/flow-cover-the-page-more-evenly-muwenwlt/r2",
+  "sha": "e793a4c6e622b4fc080d2b4cb53ba22be745595e",
+  "passed": true,
+  "exitCode": 0,
+  "cycles": 2,
+  "cost": 29878,
+  "score": 1.282986,
+  "judgeSec": 7.7,
+  "recordSha256": "b42c2993e28d033875f3cca865560ba46def4d288d7031359ef8372b54b990c7",
+  "output": "✓ setup-1  exit 0  0.0s  bun install --frozen-lockfile\n  ✓ verify   exit 0  0.6s  bun judge/check.ts flow --base 392c31ec3c0380d33ef15e64b86be0f9e7f3d102\n  ✓ gate-1   exit 0  4.9s  bun test --timeout 120000\n  ✓ gate-2   exit 0  2.2s  bunx tsc --noEmit\n  PASSED flow-cover-the-page-more-evenly-muwenwlt at e793a4c6e622  (ratified: no, base 392c31ec3c03)"
+}

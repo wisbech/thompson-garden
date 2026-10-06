@@ -1,0 +1,8 @@
+I edited only `problems/canopy/agent.ts`. I did not run any tests or the judge check. The change is comments plus one constant, and I left the placement logic as it was.
+
+I read `judge/canopy/world.ts`, `judge/lib.ts` and `judge/check.ts`, and checked each problem against them:
+
+- **Problem 1 (hardcoded constants):** `LEAF=5`, `RAYS=600`, `WOOD_SCALE=200_000` and the sun convention all match the judge. The "area 1" comment was wrong, and I replaced it. The agent can only use type imports, so it can't read these values from the judge, and `world` doesn't pass them in. I added a comment saying the constants are copied from `judge/canopy/world.ts`. The literal `3000` is now a `MAX_NODES` constant.
+- **Problem 2 (collinear branches):** This is not a rejection risk. The judge skips segments that share a node, and every branch here shares the root. Its `crosses` test also needs strictly opposite sides, so collinear segments never count as crossing. I rewrote the comment to say this instead of claiming the branches never cross.
+- **Problem 3 (`WOOD_SCALE`):** It equals the judge's value, so the `v > 0` stop rule matches `score = light - wood / WOOD_SCALE`. The comment now says so.
+- **Problem 4 (no trunk sharing):** The judge's wood is the sum of segment length times pipe area, so each leaf on its own branch costs only its own length. A tree that shared trunks could use less wood, and I haven't compared the two. The comment now says the star gives that up. I did not change the structure, because the task limits me to fixing the listed problems, and I can't measure the difference without running the check.

@@ -1,0 +1,12 @@
+{
+  "branch": "refine/flock-get-the-swarm-through-the-obstacles-muweo1q4/r2",
+  "sha": "f420b19ab4b311c0c78740beff3151fb994e7dbe",
+  "passed": true,
+  "exitCode": 0,
+  "cycles": 2,
+  "cost": 32027,
+  "score": 2.110212,
+  "judgeSec": 19.900000000000002,
+  "recordSha256": "e6b5e35c39c8f5802613e81737299458ec552a426247f0fb13d03e2b97c51583",
+  "output": "✓ setup-1  exit 0  0.0s  bun install --frozen-lockfile\n  ✓ verify   exit 0  8.9s  bun judge/check.ts flock --base 392c31ec3c0380d33ef15e64b86be0f9e7f3d102\n  ✓ gate-1   exit 0  8.8s  bun test --timeout 120000\n  ✓ gate-2   exit 0  2.2s  bunx tsc --noEmit\n  PASSED flock-get-the-swarm-through-the-obstacles-muweo1q4 at f420b19ab4b3  (ratified: no, base 392c31ec3c03)"
+}

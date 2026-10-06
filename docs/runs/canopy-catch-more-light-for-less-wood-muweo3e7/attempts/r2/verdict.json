@@ -1,0 +1,12 @@
+{
+  "branch": "refine/canopy-catch-more-light-for-less-wood-muweo3e7/r2",
+  "sha": "9b9e305df2c29153d877c1a091ff7769e723ddc0",
+  "passed": true,
+  "exitCode": 0,
+  "cycles": 2,
+  "cost": 38529,
+  "score": 1.774184,
+  "judgeSec": 6.300000000000001,
+  "recordSha256": "f62fbb64d66453de5ea858329bfdc8e5d56d64cf67dbb65068c38f1b108453ee",
+  "output": "✓ setup-1  exit 0  0.0s  bun install --frozen-lockfile\n  ✓ verify   exit 0  0.2s  bun judge/check.ts canopy --base 392c31ec3c0380d33ef15e64b86be0f9e7f3d102\n  ✓ gate-1   exit 0  4.4s  bun test --timeout 120000\n  ✓ gate-2   exit 0  1.7s  bunx tsc --noEmit\n  PASSED canopy-catch-more-light-for-less-wood-muweo3e7 at 9b9e305df2c2  (ratified: no, base 392c31ec3c03)"
+}

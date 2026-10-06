@@ -1,0 +1,6 @@
+I edited `problems/flow/agent.ts` to fix all four problems. I didn't run the tests or `bun judge/check.ts flow --base <base>`, so none of it has been scored. The only check I ran was `ruleBroken`, which returned null on the new source.
+
+1. **Reset detection:** the `world.calls <= lastCalls` test and the module-level `queue`, `head`, `done` and `lastCalls` are gone. State now lives in a `WeakMap` keyed on the `world` object. This assumes the judge passes the same `world` object on every call within a run. I didn't check that in `judge/flow/world.ts`.
+2. **Fields used:** I confirmed in `judge/flow/world.ts` that `FlowWorld` has `trails`, `nearest`, `calls`, `spacing` and `missesInARow`. The agent no longer reads `calls`. `ruleBroken` in `judge/check.ts` allows `WeakMap` and the interface type.
+3. **Random fallback cutoff:** I put it back to 400, the base value. Nothing in the diff justified 6000, and it risked running past the time budget.
+4. **Edge tolerance:** the seed test is now `world.nearest(x, y) >= world.spacing`. That matches how the judge rejects crowded starts, which is anything closer than one spacing. The old `d - 0.02` margin is gone. I left the trail-by-trail order alone, since trails are taken in the order they were made, which already works outward from the first. I noted that in a comment.

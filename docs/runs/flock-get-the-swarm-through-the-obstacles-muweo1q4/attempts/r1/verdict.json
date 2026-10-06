@@ -1,0 +1,12 @@
+{
+  "branch": "refine/flock-get-the-swarm-through-the-obstacles-muweo1q4/r1",
+  "sha": "b4e2d2bdf0eede59863d45374c5bd1f94268ae1d",
+  "passed": false,
+  "exitCode": 1,
+  "cycles": 2,
+  "cost": 30993,
+  "score": null,
+  "judgeSec": 2.5,
+  "recordSha256": "85828493bbb0c9dd30183021c1575857c448e05cc11ff9c6b95aee0a91ed5291",
+  "output": "✓ setup-1  exit 0  0.0s  bun install --frozen-lockfile\n  ✗ verify   exit 1  2.5s  bun judge/check.ts flock --base 392c31ec3c0380d33ef15e64b86be0f9e7f3d102\n      flock: base -0.0287  head -1.4097  on seeds 3991536078, 3335940488, 1169854557\n      {\"problem\":\"flock\",\"passed\":false,\"base\":{\"sha\":\"392c31ec3c0380d33ef15e64b86be0f9e7f3d102\",\"mean\":-0.028666666666666663,\"runs\":[{\"seed\":3991536078,\"score\":-0.008,\"arrived\":6,\"died\":194,\"collisions\":19},{\"seed\":3335940488,\"score\":-0.046,\"arrived\":0,\"died\":200,\"collisions\":23},{\"seed\":1169854557,\"score\":-0.032,\"arrived\":2,\"died\":198,\"collisions\":21}]},\"head\":{\"sha\":\"b4e2d2bdf0eede59863d45374c5bd1f94268ae1d\",\"mean\":-1.4096666666666666,\"runs\":[{\"seed\":3991536078,\"score\":-1.31,\"arrived\":0,\"died\":198,\"collisions\":655},{\"seed\":3335940488,\"score\":-1.8330000000000002,\"arrived\":9,\"died\":191,\"collisions\":939},{\"seed\":1169854557,\"score\":-1.0859999999999999,\"arrived\":22,\"died\":175,\"collisions\":598}]},\"seeds\":[3991536078,3335940488,1169854557]}\n  FAILED flock-get-the-swarm-through-the-obstacles-muweo1q4 at b4e2d2bdf0ee  (ratified: no, base 392c31ec3c03)"
+}

@@ -1,0 +1,9 @@
+CRITERIA:
+- 1: uncertain. The diff swaps the fractal plant for a binary tree with `iterations: 7`, `angle: 37`, `step: 60` and `shrink: 0.94`. Nothing in it shows a higher score on three worlds. I was told not to run anything, so I can't confirm the score.
+- 2: uncertain. Only `problems/ltree/agent.ts` changes, so no protected or mechanism path is touched. The source rules aren't visible in the diff, and the new grammar uses features the baseline never used.
+
+PROBLEMS:
+1. problems/ltree/agent.ts: The grammar uses `!`, a symbol the baseline never used. If `judge/ltree/world` doesn't define `!`, it is either ignored or rejected. In that case the middle shoot and the "keeps a short middle shoot" claim in the comment do not hold. Check that `!` is a supported turtle symbol and what it does.
+2. problems/ltree/agent.ts: It adds a `shrink` field the baseline never returned. Confirm that `LTreeAgent["grammar"]` includes an optional `shrink` and that the judge honours it. If the type lacks it, this is a type error or a silently ignored value.
+3. problems/ltree/agent.ts: `step` goes from 4.5 to 60, and `iterations` from 5 to 7. With branching `A` expanding to two `A`s per iteration, the output is about 128 tips. Check this against any cap in `judge/check.ts` on symbol count, total wood, segment length or world bounds. A violation would be rejected as breaking the source rules. The extra reach could also push branches off the world or into the ground.
+4. problems/ltree/agent.ts: The claim of "more light for less wood" is untested. Branches shrink only slowly (0.94) and the tips fan out to ±37° with no other control, so self-shading and wood cost could well beat the baseline's gain. The diff gives no evidence on any seeded world, and a single fixed grammar may not generalise across the three worlds.

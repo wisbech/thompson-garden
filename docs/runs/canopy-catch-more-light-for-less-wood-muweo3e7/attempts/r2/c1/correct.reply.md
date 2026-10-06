@@ -1,0 +1,8 @@
+I fixed problems 1 and 3 in `problems/canopy/agent.ts` by replacing the grid scan with a lazy greedy search. Problem 2 turned out to need no change. I didn't run the project's tests, as instructed. I did run the agent on three seeds, and it was fast and valid.
+
+- **Problem 1 (work bound):** The lazy greedy search keeps candidate cells in a max-heap and refreshes a cell's gain only when it reaches the top. Gains only shrink as rays get covered, so the stale value is an upper bound and the result is the same as the full scan. On seeds 1–3 it ran in 27–58 ms per world, against a likely ~10^9 operations for the old scan. The scores are 0.770, 0.775 and 0.761. The base scores 0.221, 0.227 and 0.226 on the same seeds. `ruleBroken` returns null for the file.
+- **Problem 2 (shading):** `judge/canopy/world.ts` doesn't model occlusion. Light counts only the rays that hit a leaf disc. Branches may share nodes without penalty, and the crossing check skips pairs of segments that share a node, so a star from the root is always valid. No change was needed.
+- **Problem 3 (early break):** The `seen` set is gone. Each cell is removed from the heap once it is picked or its gain drops to zero or below, so the loop can no longer stop early on a cell it already used. The `d < 1` guard stays, and cells that can't pay for themselves are dropped up front.
+- **Criterion 1 (constants):** Every constant in the agent matches the judge. `LEAF = 5`, `RAYS = 600`, `WOOD_SCALE = 200_000`, and the sun direction `(sin th, cos th)` with rays across `(cos th, -sin th)` are all the same as in `judge/canopy/world.ts`. Every leaf has area 1 because each is a tip.
+
+I did not run `bun judge/check.ts canopy --base <base>`, so the real seeds from the commit are untested.
