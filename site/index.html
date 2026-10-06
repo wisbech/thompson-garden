@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Thompson</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0}
+
+/* Layout: docs page with a sticky left index (desktop) and one reading column; the hero is a live packing sketch scored as it grows. */
+:root {
+  --paper: #F1F3EF; --sheet: #FAFBF8; --ink: #18211E; --muted: #5B6862; --rule: #D5DCD6;
+  --leaf: #1F6B57; --leaf-soft: rgba(31,107,87,.10); --score: #9A6B0C;
+  --display: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+  --body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #111714; --sheet: #172019; --ink: #E2E8E3; --muted: #95A39C; --rule: #2A3631;
+  --leaf: #72C4A6; --leaf-soft: rgba(114,196,166,.12); --score: #E2B654; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --paper: #111714; --sheet: #172019; --ink: #E2E8E3; --muted: #95A39C; --rule: #2A3631;
+  --leaf: #72C4A6; --leaf-soft: rgba(114,196,166,.12); --score: #E2B654; color-scheme: dark }
+
+body { background: var(--paper); color: var(--ink); font: 16px/1.6 var(--body); }
+.wrap { max-width: 1120px; margin: 0 auto; padding-inline: 20px; padding-block: 40px 80px;
+  display: grid; grid-template-columns: 200px minmax(0,1fr); gap: 56px; }
+nav { position: sticky; top: calc(env(safe-area-inset-top,0px) + 32px); align-self: start; font-size: 14px; }
+nav .brand { font: 700 22px/1 var(--display); letter-spacing: -.01em; margin-bottom: 20px; display: block; color: var(--ink); text-decoration: none; }
+nav ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+nav a { color: var(--muted); text-decoration: none; display: block; padding: 3px 0 3px 12px; border-left: 2px solid var(--rule); }
+nav a:hover, nav a:focus-visible { color: var(--ink); border-left-color: var(--leaf); outline: none; }
+main { min-width: 0; }
+section { padding-block: 28px; border-top: 1px solid var(--rule); scroll-margin-top: 24px; }
+section:first-child { border-top: 0; padding-top: 0; }
+h1 { font: 700 clamp(40px,6vw,64px)/1 var(--display); letter-spacing: -.02em; margin: 0 0 14px; text-wrap: balance; }
+h2 { font: 700 28px/1.15 var(--display); letter-spacing: -.01em; margin: 0 0 12px; text-wrap: balance; }
+h3 { font: 600 17px/1.3 var(--body); margin: 0; }
+p { margin: 0 0 12px; max-width: 66ch; }
+.lede { font-size: 19px; color: var(--ink); max-width: 60ch; }
+.eyebrow { font: 500 12px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+code, pre { font-family: var(--mono); font-size: 13.5px; }
+p code, li code, td code { background: var(--leaf-soft); padding: 1px 5px; border-radius: 3px; }
+pre { background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; padding: 14px 16px; overflow-x: auto; margin: 0 0 12px; line-height: 1.55; }
+a { color: var(--leaf); }
+
+/* hero sketch */
+.sketch { margin-top: 24px; background: var(--sheet); border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+.sketch canvas { display: block; width: 100%; aspect-ratio: 16 / 9; max-width: 100%; }
+.bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; padding: 12px 16px; border-top: 1px solid var(--rule); font-size: 14px; }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; }
+.seg button { font: 500 13px var(--body); background: transparent; color: var(--muted); border: 0; padding: 7px 12px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--rule); }
+.seg button[aria-pressed="true"] { background: var(--leaf); color: var(--sheet); }
+.seg button:focus-visible, .ghost:focus-visible { outline: 2px solid var(--leaf); outline-offset: 2px; }
+.ghost { font: 500 13px var(--body); background: transparent; color: var(--ink); border: 1px solid var(--rule); border-radius: 6px; padding: 7px 12px; cursor: pointer; }
+.readout { margin-left: auto; font: 500 14px var(--mono); font-variant-numeric: tabular-nums; color: var(--muted); }
+.readout b { color: var(--score); font-weight: 500; font-size: 18px; }
+.caption { font-size: 13.5px; color: var(--muted); padding: 0 16px 14px; margin: 0; max-width: none; }
+
+/* rules */
+ol.rules { margin: 0; padding: 0; list-style: none; counter-reset: r; display: grid; gap: 10px; }
+ol.rules li { counter-increment: r; display: grid; grid-template-columns: 28px 1fr; gap: 10px; max-width: 66ch; }
+ol.rules li::before { content: counter(r); font: 700 18px/1.4 var(--display); color: var(--leaf); }
+
+/* run steps */
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 16px 0 12px; }
+.step { background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; padding: 12px 14px; min-width: 0; }
+.step .k { font: 500 12px var(--mono); color: var(--leaf); letter-spacing: .04em; }
+.step p { font-size: 14px; color: var(--muted); margin: 4px 0 0; }
+.step.person { border-style: dashed; }
+
+/* problems */
+.problems { display: grid; gap: 12px; margin-top: 16px; }
+.prob { display: grid; grid-template-columns: 150px minmax(0,1fr); gap: 4px 20px; padding: 16px 0; border-top: 1px solid var(--rule); }
+.prob:first-child { border-top: 0; }
+.prob .src { font: 500 12px var(--mono); color: var(--muted); padding-top: 3px; }
+.prob h3 { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; }
+.pill { font: 500 11px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--score); border: 1px solid currentColor; border-radius: 99px; padding: 1px 8px; }
+.prob p { font-size: 15px; margin: 4px 0 0; }
+.prob dl { display: grid; grid-template-columns: 56px minmax(0,1fr); gap: 2px 10px; margin: 8px 0 0; font-size: 14px; }
+.prob dt { font: 500 12px/1.9 var(--mono); color: var(--muted); }
+.prob dd { margin: 0; }
+.prob.pick { background: var(--leaf-soft); border-radius: 6px; padding: 16px; border-top-color: transparent; }
+
+table { border-collapse: collapse; font-size: 14px; width: 100%; }
+.tablewrap { overflow-x: auto; }
+td, th { text-align: left; padding: 7px 10px 7px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font: 500 12px var(--mono); color: var(--muted); letter-spacing: .04em; }
+
+@media (max-width: 820px) {
+  .wrap { grid-template-columns: minmax(0,1fr); gap: 28px; padding-inline: 16px; padding-block: 24px 60px; }
+  nav { position: static; } nav ul { display: flex; flex-wrap: wrap; gap: 6px 14px; } nav a { border-left: 0; padding: 0; }
+  .prob { grid-template-columns: minmax(0,1fr); }
+  .readout { margin-left: 0; width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav aria-label="Contents">
+    <a class="brand" href="#overview">Thompson</a>
+    <ul>
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#rules">The five rules</a></li>
+      <li><a href="#run">How a card runs</a></li>
+      <li><a href="#record">The record</a></li>
+      <li><a href="#try">Try it</a></li>
+      <li><a href="#garden">Problems to grow</a></li>
+      <li><a href="#decide">What John decides</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <section id="overview">
+      <div class="eyebrow">wisbech/thompson · draft PR #1</div>
+      <h1>Thompson</h1>
+      <p class="lede">A small mechanism for changing things with agents. Every change is a card, every card carries a check, a judge the worker cannot edit decides whether the change counts, and the card folder keeps the whole story of how it got there.</p>
+      <p>Thompson has no model calls of its own. A host takes a card, runs attempts, and hands the result to the judge. A person merges.</p>
+
+      <div class="sketch">
+        <canvas id="cv" aria-label="Agents tracing a noise field into flowing lines, with the covered fraction shown as a score"></canvas>
+        <div class="bar">
+          <div class="seg" role="group" aria-label="Seeding rule">
+            <button id="m-dart" aria-pressed="true">Round 1 · random starts</button>
+            <button id="m-gap" aria-pressed="false">Round 2 · start beside a trail</button>
+          </div>
+          <button class="ghost" id="again">New field</button>
+          <div class="readout">score <b id="score">0.000</b> · <span id="count">0</span> agents</div>
+        </div>
+        <p class="caption">The recommended first problem, <a href="#garden">Flow</a>, drawn live after 02_M's noise agents. Agents ride the field and stop when they crowd another trail; the score is the share of the page within half a spacing of a trail. Same field, same check, two seeding rules: the second is the kind of change a Thompson run should find on its own.</p>
+      </div>
+    </section>
+
+    <section id="rules">
+      <h2>The five rules</h2>
+      <ol class="rules">
+        <li>Nothing counts until the judge says so.</li>
+        <li>The judged cannot edit the judge, the log, or a card's check.</li>
+        <li>Every change is a card, every card has a check, every outcome is logged, including changes to the mechanism itself.</li>
+        <li>Keep what raises the score, revert what lowers it.</li>
+        <li>A failure writes the next card. A human ratifies each new check.</li>
+      </ol>
+    </section>
+
+    <section id="run">
+      <h2>How a card runs</h2>
+      <p>The refine host in <code>adapters/refine</code> runs a card like this, in order:</p>
+      <div class="steps">
+        <div class="step"><div class="k">1 · card</div><h3>Name the task</h3><p>A title, what done means, and a check command that exits 0 or 1.</p></div>
+        <div class="step"><div class="k">2 · rollouts</div><h3>Two attempts</h3><p>Each attempt generates a change, a critic reads it blind to the tests, and the worker corrects.</p></div>
+        <div class="step"><div class="k">3 · judge</div><h3>Run the check</h3><p>The check and the project gates run on the attempt's commit in a throwaway worktree.</p></div>
+        <div class="step"><div class="k">4 · keep</div><h3>Pick the best pass</h3><p>Highest score first, then lowest cost. A failure writes the next card.</p></div>
+        <div class="step person"><div class="k">5 · person</div><h3>Merge by hand</h3><p>The kept branch waits for a human to read <code>run.md</code> and merge.</p></div>
+      </div>
+      <p>There is no polling and no lock. A card is held only while the process that took it is alive.</p>
+    </section>
+
+    <section id="record">
+      <h2>The record</h2>
+      <p>The card folder is the whole record. There is no database and no second store; <code>run.md</code> is a rendering of the folder, and every outcome also lands in a hash-chained log you can verify.</p>
+<pre>.thompson/board/done/&lt;card-id&gt;/      (still .bandit/ until the rename lands)
+  card.md              the task, acceptance and check
+  baseline.md          the score on the base, taken by hand first
+  attempts/r1/c1/      prompt, reply, diff, critique
+  attempts/r1/c2/      the corrected attempt
+  attempts/r2/…        the second rollout
+  verdict.json         what the judge ran and what it said
+  run.md               the readable story of the card</pre>
+      <p>Yesterday's first real card removed the lease from the port: both attempts were judged, the change was merged on John's word, and 216 tests stayed green.</p>
+    </section>
+
+    <section id="try">
+      <h2>Try it</h2>
+      <p>In a git repository with at least one commit on <code>main</code>:</p>
+<pre>bun install
+thompson init
+thompson task "say hello" --accept "hello.txt exists" --verify "test -f hello.txt"
+thompson next --json                # prints workDir: edit there
+echo hi &gt; &lt;workDir&gt;/hello.txt
+thompson submit &lt;id&gt; --json         # judged: passed goes to done, failed to review
+thompson log verify</pre>
+      <p>To let models do the work, point the refine host at a card:</p>
+<pre>bun adapters/refine/refine.ts --n 2 --d 2 --record docs/runs --json</pre>
+    </section>
+
+    <section id="garden">
+      <div class="eyebrow">Proposal · no code yet</div>
+      <h2>Problems to grow</h2>
+      <p>Agent problems after the <a href="https://github.com/generative-design/Code-Package-p5.js/tree/master/02_M">Generative Design 02_M sketches</a>: noise-driven agents (M_1_5), repelling nodes and springs (M_6_1, M_6_2) and recursion (M_5_1). In each one the judge owns the world (the field, the physics, the food, the graph) and the worker writes only the agent: how it senses, steers and leaves a mark. Worlds are seeded from the commit being judged, and every run has a fixed time budget, so a better score means a better rule.</p>
+      <div class="problems">
+        <article class="prob pick">
+          <div class="src">M_1_5 · noise agents</div>
+          <div><h3>Flow <span class="pill">Start here</span></h3>
+            <p>Agents ride the judge's noise field and must cover the page with evenly spaced trails. The look of the M_1_5 prints, made into a target.</p>
+            <dl><dt>writes</dt><dd>where each agent starts and when it stops</dd>
+                <dt>check</dt><dd>trails follow the field within 5°, never closer than the spacing, 10 s</dd>
+                <dt>score</dt><dd>share of the page within one spacing of a trail, over three fields</dd></dl></div>
+        </article>
+        <article class="prob">
+          <div class="src">Physarum · agents</div>
+          <div><h3>Slime</h3>
+            <p>Thousands of sensing, depositing agents grow a network between food sources, the way slime mould rebuilt the Tokyo rail map.</p>
+            <dl><dt>writes</dt><dd>sensor angle and distance, turn rule, deposit</dd>
+                <dt>check</dt><dd>the judge's trail map connects every food source</dd>
+                <dt>score</dt><dd>spanning-tree length over network length; a Steiner tree reaches about 1.15</dd></dl></div>
+        </article>
+        <article class="prob">
+          <div class="src">M_6_1 · springs</div>
+          <div><h3>Web</h3>
+            <p>Nodes repel and edges pull until a slice of the Wikipedia link graph untangles, as in M_6_1_03 and M_6_2.</p>
+            <dl><dt>writes</dt><dd>the force rules and the cooling schedule</dd>
+                <dt>check</dt><dd>inside the frame, no overlapping nodes, within budget</dd>
+                <dt>score</dt><dd>fewer edge crossings, with a small term for even edge lengths</dd></dl></div>
+        </article>
+        <article class="prob">
+          <div class="src">boids · agents</div>
+          <div><h3>Flock</h3>
+            <p>Two hundred agents cross an obstacle field. Flocking emerges from local rules; here the rules evolve under a goal.</p>
+            <dl><dt>writes</dt><dd>a steering function that sees only its neighbourhood</dd>
+                <dt>check</dt><dd>the judge owns speed, turning and collisions</dd>
+                <dt>score</dt><dd>share arriving, minus a penalty per collision</dd></dl></div>
+        </article>
+        <article class="prob">
+          <div class="src">M_5_1 · recursion</div>
+          <div><h3>Canopy</h3>
+            <p>Grow the recursive branching of M_5_1_01 into a tree that catches the most light for the least wood.</p>
+            <dl><dt>check</dt><dd>one connected tree, no crossings, pipe-model thickness</dd>
+                <dt>score</dt><dd>sun rays caught per unit of wood</dd></dl></div>
+        </article>
+      </div>
+      <p>Kept from the first draft as options: <strong>Pack</strong> (circles in a silhouette), <strong>Coral</strong> (diffusion-limited aggregation) and <strong>Methuselah</strong> (the longest-lived Game of Life seed). The full proposal, with what an improving run looks like for each, is <code>visual-problems/visual-problems.md</code> in the project files.</p>
+    </section>
+
+    <section id="decide">
+      <h2>What John decides</h2>
+      <div class="tablewrap"><table>
+        <tr><th>Question</th><th>Recommended or decided</th></tr>
+        <tr><td>Which problem first</td><td>Flow, with Slime second: agent problems where the worker writes only the agent and the form has to emerge</td></tr>
+        <tr><td>Where this page and the problems live</td><td>Decided: <code>wisbech/thompson-garden</code>, a separate repository Thompson is pointed at as a target, so Thompson stays atomic</td></tr>
+        <tr><td>One image per round in the card folder</td><td>Yes: <code>run.md</code> becomes a contact sheet of how the form grew</td></tr>
+      </table></div>
+    </section>
+  </main>
+</div>
+
+<script>
+(() => {
+  const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+  const scoreEl = document.getElementById('score'), countEl = document.getElementById('count');
+  const bDart = document.getElementById('m-dart'), bGap = document.getElementById('m-gap');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let W = 0, H = 0, D = 10, mode = 'dart', seed = 1, lines = [], grid, gw, gh, queue = [], tries = 0, raf = 0, cols = {};
+
+  // the judge's field: a smooth sum of waves, seeded
+  let ph = [];
+  function rnd() { seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
+  function newField() { ph = Array.from({ length: 6 }, () => rnd() * 6.283); }
+  function angle(x, y) {
+    const s = 2.6 / W;
+    return 1.9 * Math.sin(x * s + ph[0]) * Math.cos(y * s * 1.3 + ph[1])
+         + 1.1 * Math.sin((x * 0.7 - y) * s * 1.7 + ph[2]) + 0.6 * Math.cos((x + y) * s * 2.9 + ph[3]) + ph[4];
+  }
+  function cell(x, y) { return Math.floor(y / D) * gw + Math.floor(x / D); }
+  function near(x, y, r, self, from) {
+    const cx = Math.floor(x / D), cy = Math.floor(y / D);
+    for (let j = cy - 1; j <= cy + 1; j++) for (let i = cx - 1; i <= cx + 1; i++) {
+      if (i < 0 || j < 0 || i >= gw || j >= gh) continue;
+      for (const p of grid[j * gw + i]) {
+        if (p.l === self && p.k > from - 8) continue;
+        if ((p.x - x) ** 2 + (p.y - y) ** 2 < r * r) return true;
+      }
+    }
+    return false;
+  }
+  function trace(x0, y0) {
+    if (x0 < 0 || y0 < 0 || x0 >= W || y0 >= H || near(x0, y0, D, -1, 0)) return null;
+    const id = lines.length, step = D / 3, halves = [];
+    for (const dir of [1, -1]) {
+      const pts = []; let x = x0, y = y0;
+      for (let n = 0; n < 900; n++) {
+        const a = angle(x, y); x += dir * step * Math.cos(a); y += dir * step * Math.sin(a);
+        if (x < 0 || y < 0 || x >= W || y >= H) break;
+        if (near(x, y, D * 0.5, -1, 0)) break;
+        pts.push([x, y]);
+      }
+      halves.push(pts);
+    }
+    const pts = halves[1].reverse().concat([[x0, y0]], halves[0]);
+    if (pts.length < 10) return null;
+    pts.forEach(([x, y], k) => grid[cell(x, y)].push({ x, y, l: id, k }));
+    lines.push(pts);
+    if (mode === 'gap') for (let k = 0; k < pts.length; k += 3) {
+      const [x, y] = pts[k], a = angle(x, y);
+      queue.push([x - D * Math.sin(a), y + D * Math.cos(a)], [x + D * Math.sin(a), y - D * Math.cos(a)]);
+    }
+    return pts;
+  }
+  function stepOnce() {
+    if (mode === 'gap') {
+      while (queue.length) { const [x, y] = queue.shift(); if (trace(x, y)) return true; }
+      if (lines.length) return false;
+    }
+    for (let k = 0; k < 40; k++) { tries++; if (trace(rnd() * W, rnd() * H)) return true; }
+    return tries < 2000;
+  }
+  function score() {
+    let n = 0, c = 0; const s = D / 2;
+    for (let y = s / 2; y < H; y += s) for (let x = s / 2; x < W; x += s) { n++; if (near(x, y, D * 0.5, -1, 0)) c++; }
+    return c / n;
+  }
+  function size() {
+    const rect = cv.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2);
+    W = rect.width; H = rect.width * 9 / 16; D = Math.max(7, W / 70);
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  function readColors() {
+    const st = getComputedStyle(document.documentElement);
+    cols = { leaf: st.getPropertyValue('--leaf').trim(), muted: st.getPropertyValue('--muted').trim() };
+  }
+  function drawLine(pts) {
+    ctx.beginPath(); pts.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.stroke();
+  }
+  function draw(full) {
+    if (full) { ctx.clearRect(0, 0, W, H); ctx.strokeStyle = cols.leaf; ctx.lineWidth = 1.2; ctx.lineCap = 'round'; lines.forEach(drawLine); }
+    countEl.textContent = lines.length.toLocaleString();
+  }
+  function finish() { draw(true); scoreEl.textContent = score().toFixed(3); }
+  function run() {
+    cancelAnimationFrame(raf);
+    seed = fieldSeed; newField();
+    lines = []; queue = []; tries = 0; gw = Math.ceil(W / D) + 1; gh = Math.ceil(H / D) + 1;
+    grid = Array.from({ length: gw * gh }, () => []);
+    ctx.clearRect(0, 0, W, H); scoreEl.textContent = '…';
+    if (reduce) { while (stepOnce()); finish(); return; }
+    ctx.strokeStyle = cols.leaf; ctx.lineWidth = 1.2; ctx.lineCap = 'round';
+    let shown = 0;
+    const tick = () => {
+      let go = true; for (let i = 0; i < 3 && go; i++) go = stepOnce();
+      ctx.strokeStyle = cols.leaf; ctx.lineWidth = 1.2; ctx.lineCap = 'round';
+      for (; shown < lines.length; shown++) drawLine(lines[shown]);
+      draw(false);
+      if (go) raf = requestAnimationFrame(tick); else finish();
+    };
+    tick();
+  }
+  let fieldSeed = 20261006;
+  function setMode(m) { mode = m; bDart.setAttribute('aria-pressed', m === 'dart'); bGap.setAttribute('aria-pressed', m === 'gap'); run(); }
+  bDart.onclick = () => setMode('dart'); bGap.onclick = () => setMode('gap');
+  document.getElementById('again').onclick = () => { fieldSeed = 1 + Math.floor(Math.random() * 2e9); run(); };
+  let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { size(); run(); }, 200); });
+  const recolor = () => { readColors(); draw(true); };
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', recolor);
+  new MutationObserver(recolor).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  readColors(); size(); run();
+})();
+</script>
+
+</body>
+</html>

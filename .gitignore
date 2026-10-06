@@ -1,0 +1,5 @@
+node_modules/
+.bandit/
+.thompson/
+*.log
+.DS_Store
