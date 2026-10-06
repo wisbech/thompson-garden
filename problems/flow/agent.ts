@@ -2,32 +2,31 @@
 // It must stay self-contained (type imports only), because the check also loads the base's copy alone.
 import type { FlowWorld, Point } from "../../judge/flow/world";
 
-// Start each new trail just over one spacing beside an existing one (Jobard-Lefer seeding), working
-// outward from the first trail; when no such place is left, fall back to random starts.
-let queue: Point[] = [];
-let head = 0;
-let done = 0;
-let lastCalls = Infinity;
+// Start each new trail just over one spacing beside an existing one (Jobard-Lefer seeding), taking
+// trails in the order they were made so coverage grows outward; when no such place is left, fall back
+// to random starts. State is kept per world, so each run starts clean.
+interface Walk { queue: Point[]; head: number; done: number }
+const walks = new WeakMap<FlowWorld, Walk>();
 
 export function nextSeed(world: FlowWorld): Point | null {
-  if (world.calls <= lastCalls) { queue = []; head = 0; done = 0; }
-  lastCalls = world.calls;
+  let w = walks.get(world);
+  if (!w) walks.set(world, w = { queue: [], head: 0, done: 0 });
   const d = world.spacing * 1.01;
-  const ok = (x: number, y: number) => x >= 0 && y >= 0 && x < world.width && y < world.height && world.nearest(x, y) >= d - 0.02;
+  const ok = (x: number, y: number) => x >= 0 && y >= 0 && x < world.width && y < world.height && world.nearest(x, y) >= world.spacing;
   for (;;) {
-    while (head < queue.length) {
-      const [x, y] = queue[head++];
+    while (w.head < w.queue.length) {
+      const [x, y] = w.queue[w.head++];
       if (ok(x, y)) return [x, y];
     }
-    if (done >= world.trails.length) break;
-    queue = []; head = 0;
-    const t = world.trails[done++];
+    if (w.done >= world.trails.length) break;
+    w.queue = []; w.head = 0;
+    const t = world.trails[w.done++];
     for (let i = 0; i < t.length; i += 2) {
       const p = t[i], q = t[Math.min(i + 1, t.length - 1)], r = t[Math.max(i - 1, 0)];
       const a = Math.atan2(q[1] - r[1], q[0] - r[0]) + Math.PI / 2;
-      queue.push([p[0] + d * Math.cos(a), p[1] + d * Math.sin(a)], [p[0] - d * Math.cos(a), p[1] - d * Math.sin(a)]);
+      w.queue.push([p[0] + d * Math.cos(a), p[1] + d * Math.sin(a)], [p[0] - d * Math.cos(a), p[1] - d * Math.sin(a)]);
     }
   }
-  if (world.missesInARow >= 6000) return null;
+  if (world.missesInARow >= 400) return null;
   return [world.random() * world.width, world.random() * world.height];
 }
