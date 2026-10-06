@@ -26,22 +26,40 @@ export const grow: CanopyAgent["grow"] = (world) => {
     }
     return g / (RAYS * suns.length);
   };
-  const nodes: Node[] = [{ x: rx, y: ry, parent: -1 }];
-  const seen = new Set<string>();
-  for (let n = 0; n < 2999; n++) {
-    let best = 0, bx = 0, by = 0;
-    for (let x = 2; x <= world.width - 2; x += STEP) {
-      for (let y = 2; y <= world.height - 2; y += STEP) {
-        const d = Math.hypot(x - rx, y - ry);
-        if (d < 1) continue;
-        const v = gain(x, y, false) - d / WOOD_SCALE;
-        if (v > best) { best = v; bx = x; by = y; }
-      }
+  // lazy greedy: a cell's gain only falls as rays get covered, so a stale value is an upper bound and
+  // the top of the heap is the best cell as soon as its refreshed value still beats the next one
+  const cx: number[] = [], cy: number[] = [], cw: number[] = [], val: number[] = [], heap: number[] = [];
+  for (let x = 2; x <= world.width - 2; x += STEP) {
+    for (let y = 2; y <= world.height - 2; y += STEP) {
+      const d = Math.hypot(x - rx, y - ry);
+      if (d < 1) continue;
+      const v = gain(x, y, false) - d / WOOD_SCALE;
+      if (v <= 0) continue;
+      cx.push(x); cy.push(y); cw.push(d / WOOD_SCALE); val.push(v); heap.push(val.length - 1);
     }
-    if (best <= 0 || seen.has(bx + "," + by)) break;
-    seen.add(bx + "," + by);
-    gain(bx, by, true);
-    nodes.push({ x: bx, y: by, parent: 0 });
+  }
+  const down = (i: number) => {
+    for (;;) {
+      let m = i;
+      for (const c of [2 * i + 1, 2 * i + 2]) if (c < heap.length && val[heap[c]] > val[heap[m]]) m = c;
+      if (m === i) return;
+      [heap[i], heap[m]] = [heap[m], heap[i]];
+      i = m;
+    }
+  };
+  for (let i = (heap.length >> 1) - 1; i >= 0; i--) down(i);
+  const nodes: Node[] = [{ x: rx, y: ry, parent: -1 }];
+  while (nodes.length < 3000 && heap.length > 0) {
+    const t = heap[0];
+    const v = gain(cx[t], cy[t], false) - cw[t];
+    const next = Math.max(heap.length > 1 ? val[heap[1]] : -1, heap.length > 2 ? val[heap[2]] : -1);
+    if (v >= next && v > 0) {
+      gain(cx[t], cy[t], true);
+      nodes.push({ x: cx[t], y: cy[t], parent: 0 });
+      v === v && (val[t] = -1);
+    } else val[t] = v;
+    if (val[t] <= 0) heap[0] = heap[heap.length - 1], heap.pop();
+    down(0);
   }
   return nodes;
 };
