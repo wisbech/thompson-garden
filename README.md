@@ -27,10 +27,11 @@ touches `process`, `globalThis` or `eval`, or reassigns built-ins or prototypes.
 | [Web](problems/web/) | the forces on each node | 0.1368 |
 | [Flock](problems/flock/) | the heading each agent wants | 0.0183 |
 | [Canopy](problems/canopy/) | the program that grows the tree | 0.2247 |
+| [L-tree](problems/ltree/) | the grammar of a Lindenmayer system | −0.0352 |
 | [Pack](problems/pack/), [Coral](problems/coral/), [Methuselah](problems/methuselah/) | proposed, no judge yet | |
 
 `bun judge/check.ts <problem> --score` prints a baseline; `bun judge/check.ts all --score` is the project
-score in `thompson.json` (their sum); `bun judge/check.ts <problem> --picture out` draws one.
+score in `thompson.json` (the sum over every problem); `bun judge/check.ts <problem> --picture out` draws one.
 
 ## Run a card
 

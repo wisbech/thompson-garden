@@ -56,7 +56,8 @@ function connected(n: number, edges: Edge[]): boolean {
 
 export interface WebResult { score: number; crossings: number; overlaps: number; evenness: number; positions: Float64Array; edges: Edge[] }
 
-export function run(agent: WebAgent, seed: number, budgetMs: number): WebResult {
+// observe, if given, sees the positions after every step (for drawing).
+export function run(agent: WebAgent, seed: number, budgetMs: number, observe?: (step: number, positions: Float64Array) => void): WebResult {
   const { n, edges } = graphFor(seed), random = prng(seed ^ 0x1234);
   const pos = new Float64Array(2 * n);
   for (let i = 0; i < n; i++) { pos[2 * i] = MARGIN + random() * (WIDTH - 2 * MARGIN); pos[2 * i + 1] = MARGIN + random() * (HEIGHT - 2 * MARGIN); }
@@ -73,6 +74,7 @@ export function run(agent: WebAgent, seed: number, budgetMs: number): WebResult 
       pos[2 * i] = Math.min(WIDTH - MARGIN, Math.max(MARGIN, pos[2 * i] + dx));
       pos[2 * i + 1] = Math.min(HEIGHT - MARGIN, Math.max(MARGIN, pos[2 * i + 1] + dy));
     }
+    observe?.(step, pos);
   }
   return measure(pos, edges);
 }

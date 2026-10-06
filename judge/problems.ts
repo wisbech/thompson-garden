@@ -1,9 +1,11 @@
 // Every problem the judge knows: where its agent lives and how one seeded run is scored and drawn.
 import * as flow from "./flow/world";
 import * as slime from "./slime/world";
+import { picture as slimePicture } from "./slime/picture";
 import * as web from "./web/world";
 import * as flock from "./flock/world";
 import * as canopy from "./canopy/world";
+import * as ltree from "./ltree/world";
 
 export interface Outcome { score: number; detail: Record<string, unknown>; picture(): { ext: "svg" | "png"; data: string | Buffer } }
 export interface Problem { agent: string; run(mod: any, seed: number, budgetMs: number): Outcome }
@@ -23,7 +25,7 @@ export const problems: Record<string, Problem> = {
     agent: "problems/slime/agent.ts",
     run: (mod, seed, ms) => {
       const r = slime.run(mod, seed, ms);
-      return { score: r.score, detail: { connected: r.connected, pairsJoined: r.pairs, cells: r.cells, mst: r.mst }, picture: () => ({ ext: "png", data: slime.picture(r) }) };
+      return { score: r.score, detail: { connected: r.connected, pairsJoined: r.pairs, cells: r.cells, mst: r.mst }, picture: () => ({ ext: "png", data: slimePicture(r) }) };
     },
   },
   web: {
@@ -45,6 +47,13 @@ export const problems: Record<string, Problem> = {
     run: (mod, seed, ms) => {
       const r = canopy.run(mod, seed, ms);
       return { score: r.score, detail: { valid: r.valid, reason: r.reason, light: r.light, wood: r.wood, leaves: r.leaves }, picture: () => ({ ext: "svg", data: canopy.picture(r) }) };
+    },
+  },
+  ltree: {
+    agent: "problems/ltree/agent.ts",
+    run: (mod, seed, ms) => {
+      const r = ltree.run(mod, seed, ms);
+      return { score: r.score, detail: { valid: r.valid, reason: r.reason, light: r.light, wood: r.wood, leaves: r.leaves, symbols: r.symbols }, picture: () => ({ ext: "svg", data: ltree.picture(r) }) };
     },
   },
 };

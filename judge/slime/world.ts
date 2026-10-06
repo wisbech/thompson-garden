@@ -1,7 +1,7 @@
 // The Slime world, owned by the judge: a Physarum model after Jones (2010). The judge owns the
 // trail grid, diffusion, decay, the food and the agents' bodies; the worker writes only the rule
 // each agent uses to sense, turn and deposit.
-import { png, prng } from "../lib";
+import { prng } from "../lib";
 
 export const W = 200, H = 120;            // grid cells
 export const AGENTS = 3000;
@@ -46,7 +46,8 @@ export function mstLength(pts: [number, number][]): number {
   return total;
 }
 
-export function run(agent: SlimeAgent, seed: number, budgetMs: number): SlimeResult {
+// observe, if given, sees the trail grid after every step (for drawing; it must not change it).
+export function run(agent: SlimeAgent, seed: number, budgetMs: number, observe?: (step: number, trail: Float32Array) => void): SlimeResult {
   const random = prng(seed ^ 0xa5a5), foods = foodsFor(seed);
   const p = agent.params;
   const SA = Math.max(0, Math.min(Math.PI, +p.sensorAngle || 0)), SO = Math.max(1, Math.min(MAX_SENSOR, +p.sensorDistance || 1));
@@ -81,6 +82,7 @@ export function run(agent: SlimeAgent, seed: number, budgetMs: number): SlimeRes
       next[y * W + x] = (sum / n) * (1 - DECAY);
     }
     [trail, next] = [next, trail];
+    observe?.(step, trail);
   }
   return measure(trail, foods);
 }
@@ -116,18 +118,3 @@ export function measure(trail: Float32Array, foods: [number, number][]): SlimeRe
   return { score, connected, pairs: joined / total, cells, mst, trail, foods, network };
 }
 
-export function picture(r: SlimeResult): Buffer {
-  const S = 4, rgb = new Uint8Array(W * S * H * S * 3);
-  for (let y = 0; y < H * S; y++) for (let x = 0; x < W * S; x++) {
-    const c = Math.floor(y / S) * W + Math.floor(x / S), v = Math.min(1, r.trail[c] / (THRESHOLD * 2));
-    const o = (y * W * S + x) * 3, net = r.network[c];
-    rgb[o] = 250 - v * 200 - (net ? 30 : 0); rgb[o + 1] = 251 - v * 120 - (net ? 20 : 0); rgb[o + 2] = 248 - v * 150 - (net ? 20 : 0);
-  }
-  for (const [fx, fy] of r.foods) for (let dy = -6; dy <= 6; dy++) for (let dx = -6; dx <= 6; dx++) {
-    if (dx * dx + dy * dy > 36) continue;
-    const x = fx * S + 2 + dx, y = fy * S + 2 + dy;
-    if (x < 0 || y < 0 || x >= W * S || y >= H * S) continue;
-    const o = (y * W * S + x) * 3; rgb[o] = 154; rgb[o + 1] = 107; rgb[o + 2] = 12;
-  }
-  return png(W * S, H * S, rgb);
-}

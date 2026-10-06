@@ -30,7 +30,8 @@ export function obstaclesFor(seed: number): Obstacle[] {
 
 export interface FlockResult { score: number; arrived: number; died: number; collisions: number; paths: [number, number][][]; obstacles: Obstacle[] }
 
-export function run(agent: FlockAgent, seed: number, budgetMs: number): FlockResult {
+// observe, if given, sees every agent's position, heading and state (0 flying, 1 arrived, 2 hit) after every step.
+export function run(agent: FlockAgent, seed: number, budgetMs: number, observe?: (step: number, x: Float64Array, y: Float64Array, heading: Float64Array, state: Uint8Array) => void): FlockResult {
   const random = prng(seed ^ 0xb01d), obstacles = obstaclesFor(seed);
   const ax = new Float64Array(AGENTS), ay = new Float64Array(AGENTS), ah = new Float64Array(AGENTS);
   const state = new Uint8Array(AGENTS);          // 0 flying, 1 arrived, 2 hit an obstacle
@@ -78,6 +79,7 @@ export function run(agent: FlockAgent, seed: number, budgetMs: number): FlockRes
     }
     for (let i = 0; i < AGENTS; i++) if (state[i] === 0) for (let j = i + 1; j < AGENTS; j++)
       if (state[j] === 0 && Math.abs(ax[i] - ax[j]) < 2 * BODY && Math.hypot(ax[i] - ax[j], ay[i] - ay[j]) < 2 * BODY) touched.add(i * AGENTS + j);
+    observe?.(step, ax, ay, ah, state);
   }
   let arrived = 0, died = 0;
   const collisions = touched.size;

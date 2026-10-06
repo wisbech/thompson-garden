@@ -4,8 +4,9 @@ import * as slime from "./slime/world";
 import * as web from "./web/world";
 import * as flock from "./flock/world";
 import * as canopy from "./canopy/world";
+import * as ltree from "./ltree/world";
 
-for (const name of ["slime", "web", "flock", "canopy"]) {
+for (const name of ["slime", "web", "flock", "canopy", "ltree"]) {
   test(`${name}: the baseline runs, repeats exactly, and scores a finite number`, async () => {
     const p = problems[name], mod = await import(`../${p.agent}`);
     const a = scoreModule(p, mod, [4]), b = scoreModule(p, mod, [4]);
@@ -76,4 +77,26 @@ test("agent rules: type imports pass; real imports, process access and patched b
   expect(ruleBroken(`Math.hypot = () => 0;`)).not.toBeNull();
   expect(ruleBroken(`if (Math.random === x) {}`)).toBeNull();
   expect(ruleBroken(`process.exit(0)`)).not.toBeNull();
+});
+
+test("ltree: the turtle draws one node per F, branches with [ ], and the root needs one trunk", () => {
+  const g = { axiom: "F[+F][-F]", rules: {}, iterations: 0, angle: 90, step: 10 };
+  const n = ltree.walk(g, ltree.rewrite(g));
+  expect(n.length).toBe(4);
+  expect(n[2].parent).toBe(1);
+  expect(n[3].parent).toBe(1);
+  expect(Math.round(n[2].x)).toBe(410);
+  expect(ltree.measure(n, [0]).valid).toBe(true);
+  const fan = ltree.walk({ ...g, axiom: "[+F][-F]" }, "[+F][-F]");
+  expect(ltree.measure(fan, [0]).reason).toContain("trunk");
+});
+
+test("ltree: understory leaves catch nothing, runaway grammars are refused", () => {
+  const low = ltree.measure([{ x: 400, y: 600, parent: -1 }, { x: 400, y: 560, parent: 0 }], [0]);
+  const high = ltree.measure([{ x: 400, y: 600, parent: -1 }, { x: 400, y: 300, parent: 0 }], [0]);
+  expect(low.light).toBe(0);
+  expect(high.light).toBeGreaterThan(0);
+  const r = ltree.run({ grammar: () => ({ axiom: "F", rules: { F: "FFFFFFFFFF" }, iterations: 7, angle: 0, step: 1 }) }, 1, 1000);
+  expect(r.valid).toBe(false);
+  expect(r.score).toBe(-1);
 });
