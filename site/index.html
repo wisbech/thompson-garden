@@ -97,6 +97,11 @@ th { font: 500 12px var(--mono); color: var(--muted); letter-spacing: .04em; }
   .prob { grid-template-columns: minmax(0,1fr); }
   .readout { margin-left: 0; width: 100%; }
 }
+/* install block */
+.install { position: relative; margin: 16px 0 12px; }
+.install pre { margin: 0; padding-top: 48px; white-space: pre-wrap; }
+.install .ghost { position: absolute; top: 10px; right: 10px; }
+.install .ghost[data-done] { color: var(--leaf); border-color: var(--leaf); }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
 </style>
 </head>
@@ -110,7 +115,8 @@ th { font: 500 12px var(--mono); color: var(--muted); letter-spacing: .04em; }
       <li><a href="#rules">The five rules</a></li>
       <li><a href="#run">How a card runs</a></li>
       <li><a href="#record">The record</a></li>
-      <li><a href="#try">Try it</a></li>
+      <li><a href="#install">Install</a></li>
+      <li><a href="#try">Try it by hand</a></li>
       <li><a href="#garden">Problems to grow</a></li>
       <li><a href="#decide">What John decides</a></li>
     </ul>
@@ -164,7 +170,7 @@ th { font: 500 12px var(--mono); color: var(--muted); letter-spacing: .04em; }
     <section id="record">
       <h2>The record</h2>
       <p>The card folder is the whole record. There is no database and no second store; <code>run.md</code> is a rendering of the folder, and every outcome also lands in a hash-chained log you can verify.</p>
-<pre>.thompson/board/done/&lt;card-id&gt;/      (still .bandit/ until the rename lands)
+<pre>.thompson/board/done/&lt;card-id&gt;/
   card.md              the task, acceptance and check
   baseline.md          the score on the base, taken by hand first
   attempts/r1/c1/      prompt, reply, diff, critique
@@ -175,8 +181,32 @@ th { font: 500 12px var(--mono); color: var(--muted); letter-spacing: .04em; }
       <p>Yesterday's first real card removed the lease from the port: both attempts were judged, the change was merged on John's word, and 216 tests stayed green.</p>
     </section>
 
+    <section id="install">
+      <h2>Install: paste this into your agent</h2>
+      <p>Open Claude Code, or another coding agent, in the repository you want Thompson to work on, and paste this. The agent installs the <code>thompson</code> command if it is missing, starts a board, turns on the plugin for that project, and ends by telling you to type <code>/thompson</code>.</p>
+      <div class="install">
+        <button class="ghost" id="copy-install" type="button">Copy</button>
+<pre id="install-text">Install Thompson in this repository and turn on its Claude Code plugin. Run each step yourself, and if one fails, stop and tell me what failed.
+
+1. Check that `git` and `bun` are installed (`git --version`, `bun --version`). If bun is missing, tell me to install it from https://bun.sh and stop.
+2. If `command -v thompson` finds nothing, install the Thompson command:
+   git clone -b claude/lightweight-harness-18lhg4 https://github.com/wisbech/thompson ~/thompson
+   cd ~/thompson &amp;&amp; bun install &amp;&amp; bun link
+   Then use `export PATH="$HOME/.bun/bin:$PATH"` for the rest of these steps, and tell me to add that line to my shell profile if `~/.bun/bin` is not already on my PATH.
+3. Back in this repository's root (it needs at least one commit), run `thompson init` unless a `.thompson/` folder already exists.
+4. Turn on the plugin for this project:
+   claude plugin marketplace add wisbech/thompson#claude/lightweight-harness-18lhg4
+   claude plugin install thompson@thompson --scope project
+   If the install says a userConfig option is not set, leave it: it defaults to the `thompson` command.
+5. Show me the `.claude/settings.json` the install wrote and offer to commit it. Do not commit anything else.
+6. Tell me to run /reload-plugins (or restart Claude Code), then add a first card with `thompson task "&lt;title&gt;" --accept "&lt;what done means&gt;" --verify "&lt;a command that exits 0 when done&gt;"` and type /thompson.
+
+(Until Thompson's PR #1 is merged to main, the commands name the branch claude/lightweight-harness-18lhg4; once it is, drop `-b claude/lightweight-harness-18lhg4` and `#claude/lightweight-harness-18lhg4`.)</pre>
+      </div>
+    </section>
+
     <section id="try">
-      <h2>Try it</h2>
+      <h2>Try it by hand</h2>
       <p>In a git repository with at least one commit on <code>main</code>:</p>
 <pre>bun install
 thompson init
@@ -361,5 +391,16 @@ thompson log verify</pre>
 })();
 </script>
 
+<script>
+(() => {
+  const b = document.getElementById('copy-install'), t = document.getElementById('install-text');
+  b.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(t.textContent); }
+    catch { const r = document.createRange(); r.selectNodeContents(t); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); document.execCommand('copy'); sel.removeAllRanges(); }
+    b.textContent = 'Copied'; b.dataset.done = '';
+    setTimeout(() => { b.textContent = 'Copy'; delete b.dataset.done; }, 1600);
+  });
+})();
+</script>
 </body>
 </html>

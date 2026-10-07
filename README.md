@@ -4,6 +4,29 @@ Visual and agent problems for [Thompson](https://github.com/wisbech/thompson) to
 sketches in chapter 02_M of the [Generative Design p5.js code package](https://github.com/generative-design/Code-Package-p5.js/tree/master/02_M).
 Thompson is pointed at this repository as a target; nothing here is part of Thompson, and Thompson stays atomic.
 
+## Install Thompson: paste this into your agent
+
+Open Claude Code (or another coding agent) in the repository you want Thompson to work on, and paste:
+
+```text
+Install Thompson in this repository and turn on its Claude Code plugin. Run each step yourself, and if one fails, stop and tell me what failed.
+
+1. Check that `git` and `bun` are installed (`git --version`, `bun --version`). If bun is missing, tell me to install it from https://bun.sh and stop.
+2. If `command -v thompson` finds nothing, install the Thompson command:
+   git clone -b claude/lightweight-harness-18lhg4 https://github.com/wisbech/thompson ~/thompson
+   cd ~/thompson && bun install && bun link
+   Then use `export PATH="$HOME/.bun/bin:$PATH"` for the rest of these steps, and tell me to add that line to my shell profile if `~/.bun/bin` is not already on my PATH.
+3. Back in this repository's root (it needs at least one commit), run `thompson init` unless a `.thompson/` folder already exists.
+4. Turn on the plugin for this project:
+   claude plugin marketplace add wisbech/thompson#claude/lightweight-harness-18lhg4
+   claude plugin install thompson@thompson --scope project
+   If the install says a userConfig option is not set, leave it: it defaults to the `thompson` command.
+5. Show me the `.claude/settings.json` the install wrote and offer to commit it. Do not commit anything else.
+6. Tell me to run /reload-plugins (or restart Claude Code), then add a first card with `thompson task "<title>" --accept "<what done means>" --verify "<a command that exits 0 when done>"` and type /thompson.
+
+(Until Thompson's PR #1 is merged to main, the commands name the branch claude/lightweight-harness-18lhg4; once it is, drop `-b claude/lightweight-harness-18lhg4` and `#claude/lightweight-harness-18lhg4`.)
+```
+
 ## How it is split
 
 | Path | Owner | What it holds |
